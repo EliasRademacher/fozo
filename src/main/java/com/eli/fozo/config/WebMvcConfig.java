@@ -19,8 +19,6 @@ import java.util.Locale;
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
-
-
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
@@ -32,7 +30,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
         // Make sure all our views are in /WEB-INF/ftl/views/ and end with *.ftl
         // This helps keep the views in one place
-        // Note: This is used in conjunction with
+        // Note: This is used in conjuction with
         //       `configuration.setServletContextForTemplateLoading` below
         resolver.setPrefix("/views/");
         resolver.setSuffix(".ftl");

@@ -1,26 +1,20 @@
-## https://github.com/github/gitignore/blob/master/Java.gitignore
-*.class
-.idea/
+hotspot.log
 *.iml
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
-## https://github.com/github/gitignore/blob/master/Maven.gitignore
+*.ipr
+*.iws
 target/
-pom.xml.tag
-pom.xml.releaseBackup
+classes/
+/var
 pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
+test-output/
+/atlassian-ide-plugin.xml
+.idea
+.DS_Store
+.classpath
+.settings
+.project
+temp-testng-customsuite.xml
+test-output
+.externalToolBuilders
+*~
+/.apt_generated
