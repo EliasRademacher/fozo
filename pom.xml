@@ -23,6 +23,8 @@
 		<freemarker.version>2.3.23</freemarker.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.framework.version>4.2.0.RELEASE</spring.framework.version>
+		<objectify.version>5.1.13</objectify.version>
+		<guava.version>19.0</guava.version>
 	</properties>
 
 	<dependencies>
@@ -132,6 +134,17 @@
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 			<version>${freemarker.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.objectify</groupId>
+			<artifactId>objectify</artifactId>
+			<version>${objectify.version}</version>
 		</dependency>
 
 	</dependencies>
