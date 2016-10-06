@@ -1,6 +1,7 @@
 ## https://github.com/github/gitignore/blob/master/Java.gitignore
 *.class
 .idea/
+*.iml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
