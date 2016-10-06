@@ -15,15 +15,16 @@ public class AppInitializer implements WebApplicationInitializer {
     public void onStartup(ServletContext servletContext) throws ServletException {
         WebApplicationContext context = getContext();
         servletContext.addListener(new ContextLoaderListener(context));
-        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("DispatcherServlet", new DispatcherServlet(context));
+        ServletRegistration.Dynamic dispatcher =
+                servletContext.addServlet("DispatcherServlet", new DispatcherServlet(context));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/");
     }
 
     private AnnotationConfigWebApplicationContext getContext() {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        // Look for configuration in /src/main/java/FreeMarkerTutorials/config/
-        context.setConfigLocation("FreeMarkerTutorials.config");
+        // Look for configuration in /src/main/java/com/eli/fozo/config/
+        context.setConfigLocation("com.eli.fozo.config");
         return context;
     }
 

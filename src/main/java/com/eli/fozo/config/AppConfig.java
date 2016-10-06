@@ -4,7 +4,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = "com.eli.fozo")
+@ComponentScan({"com.eli.fozo"})
 public class AppConfig {
 
 }
