@@ -29,11 +29,11 @@ public class MainController {
 
 
 		// Send the variable "pageTitle" to the view.
-		// This can be accessed by ${pageTitle} in the FreeMarker file "hello-world.ftl"
+		// This can be accessed by ${pageTitle} in the FreeMarker file "home.ftl"
 		model.addAttribute("pageTitle", "Add a User");
 
 		// When the user navigates to http://<deploy-url>/<context>/, tell the server to use
-		// `/WEB-INF/ftl/views/hello-world.ftl` to render the view
-		return "hello-world";
+		// `/WEB-INF/ftl/views/home.ftl` to render the view
+		return "home";
 	}
 }
