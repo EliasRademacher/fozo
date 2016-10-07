@@ -9,19 +9,12 @@ public class Person {
 
     private String userName;
     private String ethnicity;
+    private Date birthDate;
     private Date joinDate;
     private String email;
     private boolean usCitizen;
 
     public Person() {
-    }
-
-    public Person(String userName, String ethnicity, Date joinDate, String email, boolean usCitizen) {
-        this.userName = userName;
-        this.ethnicity = ethnicity;
-        this.joinDate = joinDate;
-        this.email = email;
-        this.usCitizen = usCitizen;
     }
 
     public String getUserName() {
@@ -46,6 +39,14 @@ public class Person {
 
     public void setJoinDate(Date joinDate) {
         this.joinDate = joinDate;
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
     public String getEmail() {

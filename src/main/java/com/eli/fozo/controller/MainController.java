@@ -26,7 +26,14 @@ public class MainController {
     public String personSubmit(@ModelAttribute Person person, Model model) {
         model.addAttribute("pageTitle", "Thanks for Adding a User!");
 
-        System.out.println("New User: " + person.getUserName() + "\n");
+        System.out.println("Username: " + person.getUserName());
+        System.out.println("Ethnicity: " + person.getEthnicity());
+        System.out.println("Email: " + person.getEmail());
+        System.out.println("Birth Date: " + person.getBirthDate());
+        System.out.println("U.S. Citizen: " + person.isUsCitizen() + "\n");
+
+        person.setJoinDate(new Date());
+
 
 
 //		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
