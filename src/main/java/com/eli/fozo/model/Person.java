@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Created by Elias on 10/6/2016.
  */
-public class User {
+public class Person {
 
     private String userName;
     private String ethnicity;
@@ -13,10 +13,10 @@ public class User {
     private String email;
     private boolean usCitizen;
 
-    public User() {
+    public Person() {
     }
 
-    public User(String userName, String ethnicity, Date joinDate, String email, boolean usCitizen) {
+    public Person(String userName, String ethnicity, Date joinDate, String email, boolean usCitizen) {
         this.userName = userName;
         this.ethnicity = ethnicity;
         this.joinDate = joinDate;
