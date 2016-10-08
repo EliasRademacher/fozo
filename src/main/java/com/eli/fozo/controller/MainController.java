@@ -15,6 +15,14 @@ import java.util.Date;
 @Controller
 public class MainController {
 
+    /* TODO: "Users should be able to view the data for any record they
+    previously entered in a state such that it cannot be changed.
+    In other words a page to just 'view' the data." */
+
+    /* TODO: "Users should be able to enter an edit mode for any record
+    (either on the same page or loaded on a different page) allowing
+    them to change all the data associated with that record" */
+
     @RequestMapping(value="/home", method=RequestMethod.GET)
     public String personForm(Model model) {
         model.addAttribute("pageTitle", "Add a User");
@@ -34,19 +42,9 @@ public class MainController {
 
         person.setJoinDate(new Date());
 
-
-
-//		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-//
-//		Entity employee = new Entity("Person", "user1");
-//		employee.setProperty("firstName", "Antonio");
-//		employee.setProperty("lastName", "Salieri");
-//		employee.setProperty("joinDate", new Date());
-//
-//		datastore.put(employee);
-
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(new Entity("Person", person.getUserName()));
 
         return "home";
     }
-
 }
