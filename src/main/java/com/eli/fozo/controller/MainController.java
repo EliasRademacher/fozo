@@ -1,19 +1,26 @@
 package com.eli.fozo.controller;
 
 import com.eli.fozo.model.Person;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class MainController {
+
+    private final String personListKey = "all_people";
+
+
 
     /* TODO: "Users should be able to view the data for any record they
     previously entered in a state such that it cannot be changed.
@@ -46,5 +53,20 @@ public class MainController {
 		datastore.put(new Entity("Person", person.getUserName()));
 
         return "home";
+    }
+
+    @RequestMapping(value="/view", method=RequestMethod.GET)
+    public String viewAllPeople(Model model) throws EntityNotFoundException {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        Filter propertyFilter = new FilterPredicate("username", FilterOperator.NOT_EQUAL, null);
+        Query personQuery = new Query("Person");
+        personQuery.setFilter(propertyFilter);
+
+        List<Entity> allPeopleEntities = datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
+
+        model.addAttribute("allPeopleEntities", allPeopleEntities);
+
+        return "view";
     }
 }
