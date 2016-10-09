@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Controller
 public class MainController {
+
+    private static final Logger logger = Logger.getLogger(MainController.class.getName());
+
 
     /* TODO: "Users should be able to view the data for any record they
     previously entered in a state such that it cannot be changed.
@@ -67,6 +71,8 @@ public class MainController {
         String numberOfPeople = String.valueOf(allPeopleEntities.size());
 
         System.out.print("\nNumber of people retrieved: " + numberOfPeople);
+        logger.info("\nNumber of people retrieved: " + numberOfPeople);
+
         for (Entity entity : allPeopleEntities) {
             System.out.print("Retrieved user: " + entity.getProperty("userName"));
         }
