@@ -6,11 +6,8 @@
         <title>${pageTitle}</title>
     </head>
     <body>
-
         <a href="/viewAllPeople">View All People</a>
-
         <h2>Welcome!</h2>
-
         <p>${personAddedMessage}</p>
 
         <form name="person" action="home" method="post">
@@ -23,9 +20,7 @@
            <input type="radio" name="ethnicity" value="other"> Other<br>
 
            Date of Birth: <input type="date" name="birthDate"><br>
-
            Email Address: <input type="email" name="email"><br>
-
            I am a U.S. citizen <input type="checkbox" name="usCitizen" value="true"><br>
 
            <input type="submit" value="Submit"><br>
