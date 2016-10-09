@@ -6,6 +6,9 @@
         <title>${pageTitle}</title>
     </head>
     <body>
+
+        <a href="/viewAllPeople">View All People</a>
+
         <h2>Welcome!</h2>
 
         <p>${personAddedMessage}</p>

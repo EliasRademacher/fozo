@@ -4,6 +4,9 @@
         <title>${pageTitle}</title>
     </head>
     <body>
+
+        <a href="/home">Add a new Person</a>
+
         <h2>All People</h2>
 
         Number of People Retrieved: ${numberOfPeople}
