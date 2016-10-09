@@ -8,6 +8,8 @@
     <body>
         <h2>Welcome!</h2>
 
+        <p>${personAddedMessage}</p>
+
         <form name="person" action="home" method="post">
           Pick a username:<input type="text" name="userName"><br>
 

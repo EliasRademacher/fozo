@@ -33,6 +33,7 @@ public class MainController {
     @RequestMapping(value="/home", method=RequestMethod.GET)
     public String personForm(Model model) {
         model.addAttribute("pageTitle", "Add a User");
+        model.addAttribute("personAddedMessage", "");
         return "home";
     }
 
@@ -48,12 +49,14 @@ public class MainController {
 
         person.setJoinDate(new Date());
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 
         Entity personEntity = new Entity("Person", person.getUserName());
         personEntity.setProperty("userName", person.getUserName());
         datastore.put(personEntity);
+
+        model.addAttribute("personAddedMessage", "Person Successfully Added");
 
         return "home";
     }
