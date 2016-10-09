@@ -18,10 +18,6 @@ import java.util.List;
 @Controller
 public class MainController {
 
-    private final String personListKey = "all_people";
-
-
-
     /* TODO: "Users should be able to view the data for any record they
     previously entered in a state such that it cannot be changed.
     In other words a page to just 'view' the data." */
@@ -33,7 +29,6 @@ public class MainController {
     @RequestMapping(value="/home", method=RequestMethod.GET)
     public String personForm(Model model) {
         model.addAttribute("pageTitle", "Add a User");
-        model.addAttribute("person", new Person());
         return "home";
     }
 
@@ -55,18 +50,35 @@ public class MainController {
         return "home";
     }
 
-    @RequestMapping(value="/view", method=RequestMethod.GET)
+    @RequestMapping(value="/viewAllPeople", method=RequestMethod.GET)
     public String viewAllPeople(Model model) throws EntityNotFoundException {
+        model.addAttribute("pageTitle", "All People");
+
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-        Filter propertyFilter = new FilterPredicate("username", FilterOperator.NOT_EQUAL, null);
         Query personQuery = new Query("Person");
-        personQuery.setFilter(propertyFilter);
+
+//        Filter propertyFilter = new FilterPredicate("userName", FilterOperator.GREATER_THAN, "");
+//        personQuery.setFilter(propertyFilter);
 
         List<Entity> allPeopleEntities = datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
-
         model.addAttribute("allPeopleEntities", allPeopleEntities);
 
-        return "view";
+        String numberOfPeople = String.valueOf(allPeopleEntities.size());
+
+        System.out.print("\nNumber of people retrieved: " + numberOfPeople);
+        for (Entity entity : allPeopleEntities) {
+            System.out.print("Retrieved user: " + entity.getProperty("userName"));
+        }
+
+        model.addAttribute("numberOfPeople", numberOfPeople);
+
+//        Key personKey = KeyFactory.stringToKey("preston");
+//        Entity person = datastore.get(personKey);
+//        System.out.print("Retrieved user: " + person.getProperty("name"));
+
+
+
+        return "viewAllPeople";
     }
 }
