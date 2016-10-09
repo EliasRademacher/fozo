@@ -7,7 +7,7 @@ import java.util.Date;
  */
 public class Person {
 
-    private String userName;
+    public String userName;
     private String ethnicity;
     private Date birthDate;
     private Date joinDate;

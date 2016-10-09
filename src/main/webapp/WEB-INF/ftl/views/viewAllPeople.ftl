@@ -8,5 +8,10 @@
 
         Number of People Retrieved: ${numberOfPeople}
 
+        <h4>Here are all the people:</h4>
+        <#list allPeopleEntities as entity>
+            Person: ${entity.getProperty("userName")}</br>
+        </#list>
+
     </body>
 </html>

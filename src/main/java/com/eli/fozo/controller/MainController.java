@@ -49,7 +49,11 @@ public class MainController {
         person.setJoinDate(new Date());
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		datastore.put(new Entity("Person", person.getUserName()));
+
+
+        Entity personEntity = new Entity("Person", person.getUserName());
+        personEntity.setProperty("userName", person.getUserName());
+        datastore.put(personEntity);
 
         return "home";
     }
@@ -61,29 +65,16 @@ public class MainController {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
         Query personQuery = new Query("Person");
-
-//        Filter propertyFilter = new FilterPredicate("userName", FilterOperator.GREATER_THAN, "");
-//        personQuery.setFilter(propertyFilter);
-
         List<Entity> allPeopleEntities = datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
         model.addAttribute("allPeopleEntities", allPeopleEntities);
 
         String numberOfPeople = String.valueOf(allPeopleEntities.size());
-
-        System.out.print("\nNumber of people retrieved: " + numberOfPeople);
-        logger.info("\nNumber of people retrieved: " + numberOfPeople);
-
-        for (Entity entity : allPeopleEntities) {
-            System.out.print("Retrieved user: " + entity.getProperty("userName"));
-        }
-
         model.addAttribute("numberOfPeople", numberOfPeople);
 
-//        Key personKey = KeyFactory.stringToKey("preston");
-//        Entity person = datastore.get(personKey);
-//        System.out.print("Retrieved user: " + person.getProperty("name"));
-
-
+        logger.info("\nNumber of people retrieved: " + numberOfPeople);
+        for (Entity entity : allPeopleEntities) {
+            logger.info("Retrieved user: " + entity.toString());
+        }
 
         return "viewAllPeople";
     }
