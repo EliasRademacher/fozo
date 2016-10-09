@@ -53,7 +53,13 @@ public class MainController {
 
 
         Entity personEntity = new Entity("Person", person.getUserName());
+
         personEntity.setProperty("userName", person.getUserName());
+        personEntity.setProperty("birthDate", person.getBirthDate());
+        personEntity.setProperty("email", person.getEmail());
+        personEntity.setProperty("ethnicity", person.getEthnicity());
+        personEntity.setProperty("joinDate", person.getJoinDate());
+        personEntity.setProperty("usCitizen", person.isUsCitizen());
         datastore.put(personEntity);
 
         model.addAttribute("personAddedMessage", "Person Successfully Added");

@@ -12,7 +12,7 @@ public class Person {
     private Date birthDate;
     private Date joinDate;
     private String email;
-    private boolean usCitizen;
+    private Boolean usCitizen;
 
     public Person() {
     }
@@ -57,7 +57,7 @@ public class Person {
         this.email = email;
     }
 
-    public boolean isUsCitizen() {
+    public Boolean isUsCitizen() {
         return usCitizen;
     }
 
