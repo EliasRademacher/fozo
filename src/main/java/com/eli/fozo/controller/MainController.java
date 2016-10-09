@@ -43,15 +43,7 @@ public class MainController {
     @RequestMapping(value={"/", "/home"}, method=RequestMethod.POST)
     public String personSubmit(@ModelAttribute Person person, Model model) {
         model.addAttribute("pageTitle", "Thanks for Adding a User!");
-
-        System.out.println("Username: " + person.getUserName());
-        System.out.println("Ethnicity: " + person.getEthnicity());
-        System.out.println("Email: " + person.getEmail());
-        System.out.println("Birth Date: " + person.getBirthDate());
-        System.out.println("U.S. Citizen: " + person.isUsCitizen() + "\n");
-
         person.setJoinDate(new Date());
-
         Entity personEntity = new Entity("Person", person.getUserName());
 
         personEntity.setProperty("userName", person.getUserName());
@@ -90,6 +82,7 @@ public class MainController {
     public String editPerson(@RequestParam(value="userName") String userName, Model model) {
         logger.info("About to edit " + userName);
         model.addAttribute("pageTitle", "edit");
+        model.addAttribute("personEditedMessage", "");
 
         Filter filter = new FilterPredicate("userName", FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
@@ -100,9 +93,24 @@ public class MainController {
         return "edit";
     }
 
-//    @RequestMapping(value="/edit", method=RequestMethod.POST)
-//    public String editPerson(@ModelAttribute Person person, Model model) {
-//
-//        return "viewAllPeople";
-//    }
+    @RequestMapping(value="/edit", method=RequestMethod.POST)
+    public String editPerson(@ModelAttribute Person person, Model model) {
+
+        model.addAttribute("pageTitle", "Person Successfully Updated");
+
+        Entity personEntity = new Entity("Person", person.getUserName());
+
+        personEntity.setProperty("userName", person.getUserName());
+        personEntity.setProperty("birthDate", person.getBirthDate());
+        personEntity.setProperty("email", person.getEmail());
+        personEntity.setProperty("ethnicity", person.getEthnicity());
+        personEntity.setProperty("joinDate", person.getJoinDate());
+        personEntity.setProperty("usCitizen", person.isUsCitizen());
+        this.datastore.put(personEntity);
+
+        model.addAttribute("personEditedMessage", person.getUserName() + "'s information was successfully updated.");
+        model.addAttribute("personEntityToEdit", personEntity);
+
+        return "edit";
+    }
 }

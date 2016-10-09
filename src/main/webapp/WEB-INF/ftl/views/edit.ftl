@@ -8,10 +8,14 @@
     <a href="/viewAllPeople">View All People</a>
     <h2>Edit ${personEntityToEdit.getProperty("userName")}'s Information</h2>
 
+    <h3>${personEditedMessage}</h3>
+
     <#assign email=(personEntityToEdit.getProperty("email"))!"unknown">
     <#assign birthDate=(personEntityToEdit.getProperty("birthDate")?date)!"unknown">
     <#assign ethnicity=(personEntityToEdit.getProperty("ethnicity"))!"unknown">
     <#assign usCitizen=(personEntityToEdit.getProperty("usCitizen")?then('checked', ''))!"unknown">
+    <#assign joinDate=(personEntityToEdit.getProperty("joinDate")?date)!"unknown">
+    <#assign userName=personEntityToEdit.getProperty("userName")>
 
     <#assign native="">
     <#assign white="">
@@ -31,16 +35,19 @@
         <#assign other="checked">
     </#if>
 
-    <form name="person" action="home" method="post">
+    <form name="editedPerson" action="edit" method="post">
         <input type="radio" name="ethnicity" value="native" ${native}> Native American<br>
         <input type="radio" name="ethnicity" value="white" ${white}> Of European Descent<br>
         <input type="radio" name="ethnicity" value="black" ${black}> African American<br>
         <input type="radio" name="ethnicity" value="latino" ${latino}> Latino<br>
         <input type="radio" name="ethnicity" value="other" ${other}> Other<br>
 
-        Date of Birth: <input type="date" name="birthDate" placeholder="${birthDate}"><br>
-        Email Address: <input type="email" name="email" placeholder="${email}"><br>
+        Date of Birth: <input type="date" name="birthDate" value="${birthDate}"><br>
+        Email Address: <input type="email" name="email" value="${email}"><br>
         U.S. citizen <input type="checkbox" name="usCitizen" ${usCitizen}><br>
+
+        <input type="hidden" name="joinDate" value="${joinDate}">
+        <input type="hidden" name="userName" value="${userName}">
 
         <input type="submit" value="Submit Changes"><br>
     </form>
