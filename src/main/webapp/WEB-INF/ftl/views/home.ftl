@@ -20,6 +20,7 @@
            <input type="radio" name="ethnicity" value="white"> Of European Descent<br>
            <input type="radio" name="ethnicity" value="black"> African American<br>
            <input type="radio" name="ethnicity" value="latino"> Latino<br>
+           <input type="radio" name="ethnicity" value="other"> Other<br>
 
            Date of Birth: <input type="date" name="birthDate"><br>
 

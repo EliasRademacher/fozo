@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,4 +88,18 @@ public class MainController {
 
         return "viewAllPeople";
     }
+
+    @RequestMapping(value="/edit", method=RequestMethod.GET)
+    public String editPerson(@RequestParam(value="userName") String userName, Model model) {
+        logger.info("About to edit " + userName);
+        model.addAttribute("pageTitle", "edit");
+
+        return "edit";
+    }
+
+//    @RequestMapping(value="/edit", method=RequestMethod.POST)
+//    public String editPerson(@ModelAttribute Person person, Model model) {
+//
+//        return "viewAllPeople";
+//    }
 }

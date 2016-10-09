@@ -9,7 +9,10 @@
 
         <h4>Number of People Retrieved: ${numberOfPeople}</h4>
         <#list allPeopleEntities as entity>
-            <h3>${entity.getProperty("userName")!}</h3>
+        <h3>
+            ${entity.getProperty("userName")}
+            <a href="/edit?userName=${entity.getProperty("userName")}"> Edit</a>
+        </h3>
             Birthdate: ${(entity.getProperty("birthDate")?date)!"unknown"}<br>
             Email Address: ${(entity.getProperty("email"))!"unknown"}<br>
             Ethnicity: ${(entity.getProperty("ethnicity"))!"unknown"}<br>
