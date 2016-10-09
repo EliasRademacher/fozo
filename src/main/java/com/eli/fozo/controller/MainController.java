@@ -22,6 +22,8 @@ public class MainController {
 
     private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
 
     /* TODO: "Users should be able to view the data for any record they
     previously entered in a state such that it cannot be changed.
@@ -38,7 +40,7 @@ public class MainController {
         return "home";
     }
 
-    @RequestMapping(value="/home", method=RequestMethod.POST)
+    @RequestMapping(value={"/", "/home"}, method=RequestMethod.POST)
     public String personSubmit(@ModelAttribute Person person, Model model) {
         model.addAttribute("pageTitle", "Thanks for Adding a User!");
 
@@ -50,9 +52,6 @@ public class MainController {
 
         person.setJoinDate(new Date());
 
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-
         Entity personEntity = new Entity("Person", person.getUserName());
 
         personEntity.setProperty("userName", person.getUserName());
@@ -61,7 +60,7 @@ public class MainController {
         personEntity.setProperty("ethnicity", person.getEthnicity());
         personEntity.setProperty("joinDate", person.getJoinDate());
         personEntity.setProperty("usCitizen", person.isUsCitizen());
-        datastore.put(personEntity);
+        this.datastore.put(personEntity);
 
         model.addAttribute("personAddedMessage", "Person Successfully Added");
 
@@ -72,10 +71,8 @@ public class MainController {
     public String viewAllPeople(Model model) throws EntityNotFoundException {
         model.addAttribute("pageTitle", "All People");
 
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
         Query personQuery = new Query("Person");
-        List<Entity> allPeopleEntities = datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
+        List<Entity> allPeopleEntities = this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
         model.addAttribute("allPeopleEntities", allPeopleEntities);
 
         String numberOfPeople = String.valueOf(allPeopleEntities.size());
@@ -93,6 +90,12 @@ public class MainController {
     public String editPerson(@RequestParam(value="userName") String userName, Model model) {
         logger.info("About to edit " + userName);
         model.addAttribute("pageTitle", "edit");
+
+        Filter filter = new FilterPredicate("userName", FilterOperator.EQUAL, userName);
+        Query personQuery = new Query("Person").setFilter(filter);
+        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+
+        model.addAttribute("personEntityToEdit", personEntity);
 
         return "edit";
     }
