@@ -1,5 +1,10 @@
 package com.eli.fozo.model;
 
+
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -7,14 +12,42 @@ import java.util.Date;
  */
 public class Person {
 
-    public String userName;
+    @NotEmpty(message="Username must not be left blank.")
+    private String userName;
+
+    @NotEmpty(message="Ethnicity must be specified.")
     private String ethnicity;
+
+    @NotNull(message="Birth date must not be left blank")
+    @DateTimeFormat(pattern="MM/dd/yyyy")
     private Date birthDate;
+
     private Date joinDate;
+
+    @NotEmpty(message="email must not be left blank.")
     private String email;
+
+    @NotNull(message="Citizenship must be either true or false.")
     private Boolean usCitizen;
 
     public Person() {
+    }
+
+    public Person(String userName, String ethnicity, Date birthDate, String email, Boolean usCitizen) {
+        this.userName = userName;
+        this.ethnicity = ethnicity;
+        this.birthDate = birthDate;
+        this.email = email;
+        this.usCitizen = usCitizen;
+    }
+
+    public Person(String userName, String ethnicity, Date birthDate, Date joinDate, String email, Boolean usCitizen) {
+        this.userName = userName;
+        this.ethnicity = ethnicity;
+        this.birthDate = birthDate;
+        this.joinDate = joinDate;
+        this.email = email;
+        this.usCitizen = usCitizen;
     }
 
     public String getUserName() {

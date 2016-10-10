@@ -6,16 +6,16 @@
 <body>
     <a href="/home">Add a new Person</a>
     <a href="/viewAllPeople">View All People</a>
-    <h2>Edit ${personEntityToEdit.getProperty("userName")}'s Information</h2>
+    <h2>Edit ${personEntityToEdit.getProperty("userName")!"Person"}'s Information</h2>
 
     <h3>${personEditedMessage}</h3>
 
     <#assign email=(personEntityToEdit.getProperty("email"))!"unknown">
     <#assign birthDate=(personEntityToEdit.getProperty("birthDate")?date)!"unknown">
     <#assign ethnicity=(personEntityToEdit.getProperty("ethnicity"))!"unknown">
-    <#assign usCitizen=(personEntityToEdit.getProperty("usCitizen")?then('checked', ''))!"unknown">
+    <#assign usCitizen=(personEntityToEdit.getProperty("usCitizen")?then('true', 'false'))!"unknown">
     <#assign joinDate=(personEntityToEdit.getProperty("joinDate")?date)!"unknown">
-    <#assign userName=personEntityToEdit.getProperty("userName")>
+    <#assign userName=(personEntityToEdit.getProperty("userName"))!"unknown">
 
     <#assign native="">
     <#assign white="">
@@ -44,7 +44,7 @@
 
         Date of Birth: <input type="date" name="birthDate" value="${birthDate}"><br>
         Email Address: <input type="email" name="email" value="${email}"><br>
-        U.S. citizen <input type="checkbox" name="usCitizen" ${usCitizen}><br>
+        U.S. citizen <input type="checkbox" name="usCitizen" value="${usCitizen}"><br>
 
         <input type="hidden" name="joinDate" value="${joinDate}">
         <input type="hidden" name="userName" value="${userName}">

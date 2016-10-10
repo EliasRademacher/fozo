@@ -7,11 +7,13 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,24 +26,20 @@ public class MainController {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-
-    /* TODO: "Users should be able to view the data for any record they
-    previously entered in a state such that it cannot be changed.
-    In other words a page to just 'view' the data." */
-
-    /* TODO: "Users should be able to enter an edit mode for any record
-    (either on the same page or loaded on a different page) allowing
-    them to change all the data associated with that record" */
-
-    @RequestMapping(value="/home", method=RequestMethod.GET)
+    @RequestMapping(value={"/", "/home"}, method=RequestMethod.GET)
     public String personForm(Model model) {
-        model.addAttribute("pageTitle", "Add a User");
+        model.addAttribute("pageTitle", "Add a Person");
         model.addAttribute("personAddedMessage", "");
         return "home";
     }
 
-    @RequestMapping(value={"/", "/home"}, method=RequestMethod.POST)
-    public String personSubmit(@ModelAttribute Person person, Model model) {
+    @RequestMapping(value="/home", method=RequestMethod.POST)
+    public String personSubmit(@Valid @ModelAttribute Person person, BindingResult result, Model model) {
+        if(result.hasErrors()) {
+            model.addAttribute("personAddedMessage", result.getAllErrors().get(0).getDefaultMessage());
+            return "home";
+        }
+
         model.addAttribute("pageTitle", "Thanks for Adding a User!");
         person.setJoinDate(new Date());
         Entity personEntity = new Entity("Person", person.getUserName());
@@ -80,9 +78,8 @@ public class MainController {
 
     @RequestMapping(value="/edit", method=RequestMethod.GET)
     public String editPerson(@RequestParam(value="userName") String userName, Model model) {
-        logger.info("About to edit " + userName);
+        model.addAttribute("personEditedMessage", "\n ");
         model.addAttribute("pageTitle", "edit");
-        model.addAttribute("personEditedMessage", "");
 
         Filter filter = new FilterPredicate("userName", FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
@@ -94,11 +91,16 @@ public class MainController {
     }
 
     @RequestMapping(value="/edit", method=RequestMethod.POST)
-    public String editPerson(@ModelAttribute Person person, Model model) {
-
-        model.addAttribute("pageTitle", "Person Successfully Updated");
-
+    public String editPerson(@Valid @ModelAttribute Person person, BindingResult result, Model model) {
         Entity personEntity = new Entity("Person", person.getUserName());
+        model.addAttribute("personEntityToEdit", personEntity);
+        model.addAttribute("pageTitle", "edit");
+
+        if(result.hasErrors()) {
+            model.addAttribute("personEditedMessage", result.getAllErrors().get(0).getDefaultMessage());
+            return "edit";
+        }
+
 
         personEntity.setProperty("userName", person.getUserName());
         personEntity.setProperty("birthDate", person.getBirthDate());
@@ -106,10 +108,9 @@ public class MainController {
         personEntity.setProperty("ethnicity", person.getEthnicity());
         personEntity.setProperty("joinDate", person.getJoinDate());
         personEntity.setProperty("usCitizen", person.isUsCitizen());
-        this.datastore.put(personEntity);
 
-        model.addAttribute("personEditedMessage", person.getUserName() + "'s information was successfully updated.");
-        model.addAttribute("personEntityToEdit", personEntity);
+        String personEditedMessage = person.getUserName() + "'s information was successfully updated.";
+        model.addAttribute("personEditedMessage", personEditedMessage);
 
         return "edit";
     }

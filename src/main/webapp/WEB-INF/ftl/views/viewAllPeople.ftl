@@ -17,7 +17,7 @@
             Email Address: ${(entity.getProperty("email"))!"unknown"}<br>
             Ethnicity: ${(entity.getProperty("ethnicity"))!"unknown"}<br>
             Join Date: ${(entity.getProperty("joinDate")?date)!"unknown"}<br>
-            U.S. Citizen? ${(entity.getProperty("usCitizen")?then('Yes', 'No'))!"unknown"}<br>
+            U.S. Citizen? ${(entity.getProperty("usCitizen")?then('Yes', 'No'))}<br>
         </#list>
 
     </body>
