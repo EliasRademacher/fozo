@@ -24,7 +24,7 @@ public class MainController {
 
     private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @RequestMapping(value={"/", "/home"}, method=RequestMethod.GET)
     public String personForm(Model model) {
