@@ -17,7 +17,7 @@ import java.util.List;
 public class WebAPIController {
 
     @RequestMapping(value="/people", method=RequestMethod.GET)
-    public Person people() {
+    public List<Person> people() {
         Person person = new Person(
                 "web_api_user",
                 "Islander",
@@ -26,9 +26,21 @@ public class WebAPIController {
                 Boolean.FALSE
         );
 
+        Person person2 = new Person(
+                "web_developer_guy",
+                "Native",
+                new Date(),
+                "user2@yahoo.com",
+                Boolean.TRUE
+        );
+
+
+
         ArrayList<Person> people = new ArrayList<>();
         people.add(person);
-        return person;
+        people.add(person2);
+
+        return people;
     }
 
 
