@@ -44,10 +44,10 @@
 
         Date of Birth: <input type="date" name="birthDate" value="${birthDate?string.short}"><br>
         Email Address: <input type="email" name="email" value="${email}"><br>
-        U.S. citizen <input type="checkbox" name="usCitizen" value="${usCitizen}"><br>
+        U.S. citizen <input type="checkbox" name="usCitizen"><br>
 
-        <input type="date" name="joinDate" value="${joinDate?string.short}">
-        <input type="username" name="userName" value="${userName}">
+        <input type="hidden" name="joinDate" value="${joinDate?string.short}">
+        <input type="hidden" name="userName" value="${userName}">
 
         <input type="submit" value="Submit Changes"><br>
     </form>
