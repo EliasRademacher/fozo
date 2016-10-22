@@ -2,13 +2,14 @@ package com.eli.fozo.controller;
 
 import com.eli.fozo.model.Person;
 import com.google.appengine.api.datastore.*;
-import com.sun.org.apache.xerces.internal.impl.dv.dtd.ENTITYDatatypeValidator;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -36,6 +37,12 @@ public class WebAPIController {
         }
 
         return people;
+    }
+
+    @RequestMapping(value="/people", method=RequestMethod.POST)
+    public ResponseEntity<?> people(@RequestBody Person person) {
+
+        return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
 
 }
