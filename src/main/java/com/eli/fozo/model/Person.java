@@ -1,6 +1,7 @@
 package com.eli.fozo.model;
 
 
+import com.google.appengine.api.datastore.Entity;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -48,6 +49,15 @@ public class Person {
         this.joinDate = joinDate;
         this.email = email;
         this.usCitizen = usCitizen;
+    }
+
+    public Person(Entity entity) {
+        this.userName = (String) entity.getProperty("userName");
+        this.ethnicity = (String) entity.getProperty("ethnicity");
+        this.birthDate = (Date) entity.getProperty("birthDate");
+        this.joinDate = (Date) entity.getProperty("joinDate");
+        this.email = (String) entity.getProperty("email");
+        this.usCitizen = (Boolean) entity.getProperty("usCitizen");
     }
 
     public String getUserName() {
