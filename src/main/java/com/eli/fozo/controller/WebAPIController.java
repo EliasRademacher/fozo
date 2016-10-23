@@ -95,14 +95,26 @@ public class WebAPIController {
 
     @RequestMapping(value="/people", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePeople(@RequestBody List<Person> people) {
-        Query personQuery = new Query("Person");
-        List<Entity> allPeopleEntities =
-                this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
 
+        List<Entity> personEntities = new ArrayList<>();
 
-        for (int i = 0; i < allPeopleEntities.size(); i++) {
-            Entity personEntity = allPeopleEntities.get(i);
+        for (Person person : people) {
+            Query.Filter filter =
+                    new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
+            Query personQuery = new Query("Person").setFilter(filter);
+            Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+
+            /* Check if each person exists. */
+            if (null == personEntity) {
+                return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+            }
+
+            personEntities.add(personEntity);
+        }
+
+        for (int i = 0; i < people.size(); i++) {
             Person person = people.get(i);
+            Entity personEntity = personEntities.get(i);
 
             /* No update operation in Google Datastore, so replace old Person with updated one. */
             /* Note that this currently allows a person's username to be updated. */
