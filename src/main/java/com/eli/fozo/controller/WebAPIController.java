@@ -39,11 +39,12 @@ public class WebAPIController {
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
-    public Person getPerson(@PathVariable String userName) {
+    public ResponseEntity<Person> getPerson(@PathVariable String userName) {
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
-        return new Person(personEntity);
+        Person person = new Person(personEntity);
+        return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
