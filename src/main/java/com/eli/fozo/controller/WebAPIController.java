@@ -34,6 +34,9 @@ public class WebAPIController {
     @RequestMapping(value="/people", method=RequestMethod.GET)
     public ResponseEntity<List<Person>> getPeople() {
         Query personQuery = new Query("Person");
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
 
@@ -50,6 +53,10 @@ public class WebAPIController {
     public ResponseEntity<Person> getPerson(@PathVariable String userName) {
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
         Person person = new Person(personEntity);
         return new ResponseEntity<>(person, HttpStatus.OK);
@@ -62,6 +69,7 @@ public class WebAPIController {
 
         person.setJoinDate(new Date());
 
+        /* TODO: Maybe don't name the key for this entity the same thing as its userName property. */
         Entity personEntity = new Entity("Person", person.getUserName(), this.defaultGroupKey);
 
         personEntity.setProperty("userName", person.getUserName());
@@ -82,6 +90,10 @@ public class WebAPIController {
         Query.Filter filter =
                 new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
 
         if (null == personEntity) {
@@ -112,6 +124,10 @@ public class WebAPIController {
             Query.Filter filter =
                     new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
             Query personQuery = new Query("Person").setFilter(filter);
+
+            /* Ancestor queries are guaranteed to maintain strong consistency. */
+            personQuery.setAncestor(this.defaultGroupKey);
+
             Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
 
             /* Check if each person exists. */
@@ -145,7 +161,13 @@ public class WebAPIController {
     @RequestMapping(value="/people", method=RequestMethod.DELETE)
     public ResponseEntity<?> deletePeople() {
         Query personQuery = new Query("Person");
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
         personQuery.setKeysOnly();
+
+        /* TODO: Is it possible to fetch all people by just specifying the default ancestor key? */
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
 
@@ -160,6 +182,10 @@ public class WebAPIController {
     public ResponseEntity<?> deletePerson(@PathVariable String userName) {
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
         personQuery.setKeysOnly();
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
         this.datastore.delete(personEntity.getKey());
