@@ -4,8 +4,11 @@ import com.eli.fozo.model.Person;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import validation.ValidationErrorBuilder;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.logging.Logger;
 @RestController
 public class WebAPIController {
 
-    private static final Logger logger = Logger.getLogger(MainController.class.getName());
+    private static final Logger logger = Logger.getLogger(WebAPIController.class.getName());
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -63,7 +66,11 @@ public class WebAPIController {
     }
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
-    public ResponseEntity<?> createPerson(@RequestBody Person person) {
+    public ResponseEntity<?> createPerson(@Valid @RequestBody Person person, Errors errors) {
+
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(ValidationErrorBuilder.fromBindingErrors(errors));
+        }
 
         /* Make sure this person does not already exist. */
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());

@@ -2,8 +2,10 @@ package com.eli.fozo.model;
 
 
 import com.google.appengine.api.datastore.Entity;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -11,9 +13,10 @@ import java.util.Date;
 /**
  * Created by Elias on 10/6/2016.
  */
+
 public class Person {
 
-    @NotEmpty(message="Username must not be left blank.")
+    @NotBlank(message="Username must not be left blank.")
     private String userName;
 
     @NotEmpty(message="Ethnicity must be specified.")
