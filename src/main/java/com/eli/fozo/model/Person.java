@@ -16,7 +16,7 @@ import java.util.Date;
 
 public class Person {
 
-    @NotBlank(message="Username must not be left blank.")
+    @NotEmpty(message="Username must not be left blank.")
     private String userName;
 
     @NotEmpty(message="Ethnicity must be specified.")

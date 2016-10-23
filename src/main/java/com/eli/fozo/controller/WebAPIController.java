@@ -5,7 +5,6 @@ import com.eli.fozo.validation.ValidationError;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import com.eli.fozo.validation.ValidationErrorBuilder;
@@ -69,17 +68,17 @@ public class WebAPIController {
 
 
 
-
-    @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ValidationError handleException(MethodArgumentNotValidException exception) {
-        return createValidationError(exception);
-    }
-
-    private ValidationError createValidationError(MethodArgumentNotValidException exception) {
-        return ValidationErrorBuilder.fromBindingErrors(exception.getBindingResult());
-    }
-
+//
+//    @ExceptionHandler
+//    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+//    public ValidationError handleException(MethodArgumentNotValidException exception) {
+//        return createValidationError(exception);
+//    }
+//
+//    private ValidationError createValidationError(MethodArgumentNotValidException exception) {
+//        return ValidationErrorBuilder.fromBindingErrors(exception.getBindingResult());
+//    }
+//
 
 
 
