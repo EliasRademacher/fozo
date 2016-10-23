@@ -24,7 +24,7 @@ public class WebAPIController {
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @RequestMapping(value="/people", method=RequestMethod.GET)
-    public List<Person> getPeople() {
+    public ResponseEntity<List<Person>> getPeople() {
         Query personQuery = new Query("Person");
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
@@ -35,7 +35,7 @@ public class WebAPIController {
             people.add(new Person(entity));
         }
 
-        return people;
+        return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
@@ -129,6 +129,12 @@ public class WebAPIController {
         }
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value="/people", method=RequestMethod.DELETE)
+    public ResponseEntity<?> deletePeople() {
+
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
 }
