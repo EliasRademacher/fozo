@@ -23,6 +23,14 @@ public class WebAPIController {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+    private Key defaultGroupKey;
+
+    public WebAPIController() {
+        Entity defaultGroup = new Entity("personGroup", "defaultGroup");
+        this.defaultGroupKey = defaultGroup.getKey();
+        datastore.put(defaultGroup);
+    }
+
     @RequestMapping(value="/people", method=RequestMethod.GET)
     public ResponseEntity<List<Person>> getPeople() {
         Query personQuery = new Query("Person");
@@ -54,7 +62,7 @@ public class WebAPIController {
 
         person.setJoinDate(new Date());
 
-        Entity personEntity = new Entity("Person", person.getUserName());
+        Entity personEntity = new Entity("Person", person.getUserName(), this.defaultGroupKey);
 
         personEntity.setProperty("userName", person.getUserName());
         personEntity.setProperty("birthDate", person.getBirthDate());
