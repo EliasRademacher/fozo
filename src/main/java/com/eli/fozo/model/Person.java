@@ -2,6 +2,7 @@ package com.eli.fozo.model;
 
 
 import com.google.appengine.api.datastore.Entity;
+import com.sun.xml.internal.ws.server.sei.SEIInvokerTube;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Elias on 10/6/2016.
@@ -34,18 +38,20 @@ public class Person {
     @NotNull(message="Citizenship must be either true or false.")
     private Boolean usCitizen;
 
+    private Set<Challenge> challengesCompleted;
+
+    private Set<Challenge> challengesPending;
+
     public Person() {
     }
 
     public Person(String userName, String ethnicity, Date birthDate, String email, Boolean usCitizen) {
-        this.userName = userName;
-        this.ethnicity = ethnicity;
-        this.birthDate = birthDate;
-        this.email = email;
-        this.usCitizen = usCitizen;
+        this(userName, ethnicity, birthDate, null, email, usCitizen);
     }
 
     public Person(String userName, String ethnicity, Date birthDate, Date joinDate, String email, Boolean usCitizen) {
+        this.challengesPending = new HashSet<>();
+        this.challengesCompleted = new HashSet<>();
         this.userName = userName;
         this.ethnicity = ethnicity;
         this.birthDate = birthDate;
@@ -110,4 +116,14 @@ public class Person {
     public void setUsCitizen(boolean usCitizen) {
         this.usCitizen = usCitizen;
     }
+
+    public void addChallenge(Challenge challenge) {
+        this.challengesPending.add(challenge);
+    }
+
+    public void completeChallenge(Challenge challenge) {
+        this.challengesCompleted.add(challenge);
+        this.challengesPending.remove(challenge);
+    }
+
 }

@@ -65,6 +65,16 @@ public class Challenge {
         this.tags = tags;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Challenge challenge = (Challenge) o;
+
+        return id == challenge.id;
+    }
+
     public void incrementPoints() {
         this.points++;
     }
