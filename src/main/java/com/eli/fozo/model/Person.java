@@ -113,6 +113,22 @@ public class Person {
         this.usCitizen = usCitizen;
     }
 
+    public Set<Challenge> getChallengesCompleted() {
+        return challengesCompleted;
+    }
+
+    public void setChallengesCompleted(Set<Challenge> challengesCompleted) {
+        this.challengesCompleted = challengesCompleted;
+    }
+
+    public Set<Challenge> getChallengesPending() {
+        return challengesPending;
+    }
+
+    public void setChallengesPending(Set<Challenge> challengesPending) {
+        this.challengesPending = challengesPending;
+    }
+
     public void addChallenge(Challenge challenge) {
         this.challengesPending.add(challenge);
     }

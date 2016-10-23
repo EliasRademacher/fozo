@@ -1,20 +1,14 @@
 package com.eli.fozo.controller;
 
 import com.eli.fozo.model.Challenge;
-import com.eli.fozo.model.ChallengeType;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.repackaged.com.google.common.collect.ArrayListMultimap;
+import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -29,7 +23,7 @@ public class ChallengeController {
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 
-    @RequestMapping(value="/challenge", method= RequestMethod.POST)
+    @RequestMapping(value="/challenges", method= RequestMethod.POST)
     public ResponseEntity<?> createChallenge(@Valid @RequestBody Challenge challenge) {
 
         /* Make sure this challenge does not already exist. */
@@ -44,6 +38,7 @@ public class ChallengeController {
 
         Entity challengeEntity = new Entity("Challenge", challenge.getId());
 
+        challengeEntity.setProperty("id", challenge.getId());
         challengeEntity.setProperty("points", challenge.getPoints());
         challengeEntity.setProperty("location", challenge.getLocation());
         challengeEntity.setProperty("description", challenge.getDescription());
@@ -53,6 +48,32 @@ public class ChallengeController {
         this.datastore.put(challengeEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+
+    @RequestMapping(value="/challenges", method=RequestMethod.GET)
+    public ResponseEntity<List<Challenge>> getChallenges() {
+        Query challengeQuery = new Query("Challenge");
+        List<Entity> challengeEntities =
+                this.datastore.prepare(challengeQuery).asList(FetchOptions.Builder.withDefaults());
+
+        List<Challenge> challenges = new ArrayList<>();
+
+        for (Entity entity : challengeEntities) {
+            challenges.add(new Challenge(entity));
+        }
+
+        return new ResponseEntity<>(challenges, HttpStatus.OK);
+    }
+
+    @RequestMapping(value="/challenges/{id}", method=RequestMethod.GET)
+    public ResponseEntity<Challenge> getChallenge(@PathVariable("id") long id) {
+        Query.Filter filter = new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, id);
+        Query challengeQuery = new Query("Challenge").setFilter(filter);
+
+        Entity challengeEntity = this.datastore.prepare(challengeQuery).asSingleEntity();
+        Challenge challenge = new Challenge(challengeEntity);
+        return new ResponseEntity<>(challenge, HttpStatus.OK);
     }
 
 }

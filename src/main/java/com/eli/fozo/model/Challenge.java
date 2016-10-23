@@ -1,6 +1,8 @@
 package com.eli.fozo.model;
 
-import java.util.Set;
+import com.google.appengine.api.datastore.Entity;
+
+import java.util.List;
 
 /**
  * Created by Elias on 10/23/2016.
@@ -8,13 +10,22 @@ import java.util.Set;
 public class Challenge {
 
     private long id;
-    private Integer points;
+    private long points;
     private String location;
     private String description;
-    private Integer completions;
-    private Set<String> tags;
+    private long completions;
+    private List<String> tags;
 
     public Challenge() {
+    }
+
+    public Challenge(Entity entity ) {
+        this.id = (long) entity.getProperty("id");
+        this.points = (long) entity.getProperty("points");
+        this.location= (String) entity.getProperty("location");
+        this.description = (String) entity.getProperty("description");
+        this.completions = (long) entity.getProperty("completions");
+        this.tags = (List<String>) entity.getProperty("tags");
     }
 
     public long getId() {
@@ -25,11 +36,11 @@ public class Challenge {
         this.id = id;
     }
 
-    public Integer getPoints() {
+    public long getPoints() {
         return points;
     }
 
-    public void setPoints(Integer points) {
+    public void setPoints(long points) {
         this.points = points;
     }
 
@@ -49,19 +60,19 @@ public class Challenge {
         this.description = description;
     }
 
-    public Integer getCompletions() {
+    public long getCompletions() {
         return completions;
     }
 
-    public void setCompletions(Integer completions) {
+    public void setCompletions(long completions) {
         this.completions = completions;
     }
 
-    public Set<String> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(Set<String> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 

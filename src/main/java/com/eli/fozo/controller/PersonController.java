@@ -1,5 +1,6 @@
 package com.eli.fozo.controller;
 
+import com.eli.fozo.model.Challenge;
 import com.eli.fozo.model.Person;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -91,6 +93,9 @@ public class PersonController {
         personEntity.setProperty("ethnicity", person.getEthnicity());
         personEntity.setProperty("joinDate", person.getJoinDate());
         personEntity.setProperty("usCitizen", person.isUsCitizen());
+        personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
+        personEntity.setProperty("challengesPending", person.getChallengesPending());
+
         this.datastore.put(personEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
@@ -128,10 +133,65 @@ public class PersonController {
         personEntity.setProperty("joinDate", person.getJoinDate());
         personEntity.setProperty("usCitizen", person.isUsCitizen());
         personEntity.setProperty("joinDate", person.getJoinDate());
+        personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
+        personEntity.setProperty("challengesPending", person.getChallengesPending());
         this.datastore.put(personEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
+
+
+
+    @RequestMapping(value="/people/{userName}/challenge/{id}", method=RequestMethod.PUT)
+    public ResponseEntity<?> updatePerson(
+            /*@RequestBody Challenge challenge,*/
+            @PathVariable String userName,
+            @PathVariable long id) {
+
+        /* TODO: Make sure that the provided Person is valid. */
+
+        /* Check if this person exists. */
+        Query.Filter filter =
+                new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
+        Query personQuery = new Query("Person").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
+        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+
+        if (null == personEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to update a Person that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        /* Check if the Challenge already exists*/
+        filter = new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, id);
+        Query challengeQuery = new Query("Challenge").setFilter(filter);
+        Entity challengeEntity = this.datastore.prepare(challengeQuery).asSingleEntity();
+
+        if (null == challengeEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to update a Challenge that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        Set<Challenge> challengesPending = (Set<Challenge>) personEntity.getProperty("challengesPending");
+
+        Challenge newChallenge = new Challenge(challengeEntity);
+        challengesPending.add(newChallenge);
+        personEntity.setProperty("challengesPending", challengesPending);
+
+        this.datastore.put(personEntity);
+
+        return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+
+
 
     @RequestMapping(value="/people", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePeople(@RequestBody List<Person> people) {
@@ -171,6 +231,8 @@ public class PersonController {
             personEntity.setProperty("joinDate", person.getJoinDate());
             personEntity.setProperty("usCitizen", person.isUsCitizen());
             personEntity.setProperty("joinDate", person.getJoinDate());
+            personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
+            personEntity.setProperty("challengesPending", person.getChallengesPending());
             this.datastore.put(personEntity);
         }
 
