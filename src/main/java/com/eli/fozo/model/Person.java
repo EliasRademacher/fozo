@@ -1,21 +1,17 @@
 package com.eli.fozo.model;
 
-
 import com.google.appengine.api.datastore.Entity;
-import com.sun.xml.internal.ws.server.sei.SEIInvokerTube;
-import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Created by Elias on 10/6/2016.
+ *
  */
 
 public class Person {

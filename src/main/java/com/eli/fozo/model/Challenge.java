@@ -1,6 +1,6 @@
 package com.eli.fozo.model;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Elias on 10/23/2016.
@@ -12,7 +12,7 @@ public class Challenge {
     private String location;
     private String description;
     private Integer completions;
-    private List<ChallengeType> tags;
+    private Set<String> tags;
 
     public Challenge() {
     }
@@ -57,11 +57,11 @@ public class Challenge {
         this.completions = completions;
     }
 
-    public List<ChallengeType> getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<ChallengeType> tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 

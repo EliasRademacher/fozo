@@ -1,13 +1,10 @@
 package com.eli.fozo.controller;
 
 import com.eli.fozo.model.Person;
-import com.eli.fozo.validation.ValidationError;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import com.eli.fozo.validation.ValidationErrorBuilder;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -21,15 +18,15 @@ import java.util.logging.Logger;
  */
 
 @RestController
-public class WebAPIController {
+public class PersonController {
 
-    private static final Logger logger = Logger.getLogger(WebAPIController.class.getName());
+    private static final Logger logger = Logger.getLogger(PersonController.class.getName());
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     private Key defaultGroupKey;
 
-    public WebAPIController() {
+    public PersonController() {
         Entity defaultGroup = new Entity("personGroup", "defaultGroup");
         this.defaultGroupKey = defaultGroup.getKey();
         datastore.put(defaultGroup);
@@ -115,6 +112,7 @@ public class WebAPIController {
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
 
         if (null == personEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to update a Person that does not exist.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
