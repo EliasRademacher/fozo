@@ -49,6 +49,8 @@ public class WebAPIController {
     @RequestMapping(value="/people", method=RequestMethod.POST)
     public ResponseEntity<?> createPerson(@RequestBody Person person) {
 
+        /* TODO: Make sure person does not already exist. */
+
         person.setJoinDate(new Date());
 
         Entity personEntity = new Entity("Person", person.getUserName());
@@ -87,6 +89,32 @@ public class WebAPIController {
         personEntity.setProperty("usCitizen", person.isUsCitizen());
         personEntity.setProperty("joinDate", person.getJoinDate());
         this.datastore.put(personEntity);
+
+        return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value="/people", method=RequestMethod.PUT)
+    public ResponseEntity<?> updatePeople(@RequestBody List<Person> people) {
+        Query personQuery = new Query("Person");
+        List<Entity> allPeopleEntities =
+                this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
+
+
+        for (int i = 0; i < allPeopleEntities.size(); i++) {
+            Entity personEntity = allPeopleEntities.get(i);
+            Person person = people.get(i);
+
+            /* No update operation in Google Datastore, so replace old Person with updated one. */
+            /* Note that this currently allows a person's username to be updated. */
+            personEntity.setProperty("userName", person.getUserName());
+            personEntity.setProperty("birthDate", person.getBirthDate());
+            personEntity.setProperty("email", person.getEmail());
+            personEntity.setProperty("ethnicity", person.getEthnicity());
+            personEntity.setProperty("joinDate", person.getJoinDate());
+            personEntity.setProperty("usCitizen", person.isUsCitizen());
+            personEntity.setProperty("joinDate", person.getJoinDate());
+            this.datastore.put(personEntity);
+        }
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
