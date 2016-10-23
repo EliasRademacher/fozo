@@ -146,4 +146,14 @@ public class WebAPIController {
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
+    @RequestMapping(value="/people/{userName}", method=RequestMethod.DELETE)
+    public ResponseEntity<?> deletePerson(@PathVariable String userName) {
+        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
+        Query personQuery = new Query("Person").setFilter(filter);
+        personQuery.setKeysOnly();
+        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+        this.datastore.delete(personEntity.getKey());
+        return new ResponseEntity<Object>(HttpStatus.OK);
+    }
+
 }
