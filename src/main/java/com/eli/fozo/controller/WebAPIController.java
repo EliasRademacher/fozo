@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -41,6 +42,18 @@ public class WebAPIController {
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
     public ResponseEntity<?> people(@RequestBody Person person) {
+
+        person.setJoinDate(new Date());
+
+        Entity personEntity = new Entity("Person", person.getUserName());
+
+        personEntity.setProperty("userName", person.getUserName());
+        personEntity.setProperty("birthDate", person.getBirthDate());
+        personEntity.setProperty("email", person.getEmail());
+        personEntity.setProperty("ethnicity", person.getEthnicity());
+        personEntity.setProperty("joinDate", person.getJoinDate());
+        personEntity.setProperty("usCitizen", person.isUsCitizen());
+        this.datastore.put(personEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
