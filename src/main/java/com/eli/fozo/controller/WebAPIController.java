@@ -73,14 +73,15 @@ public class WebAPIController {
         personQuery.setAncestor(this.defaultGroupKey);
 
         if (null != this.datastore.prepare(personQuery).asSingleEntity()) {
-            logger.warning("Attempted to create a Person with a userName that already exists.");
-            return new ResponseEntity<Object>(HttpStatus.FORBIDDEN);
+            String message = "Attempted to create a Person with a userName that already exists.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
 
 
         person.setJoinDate(new Date());
 
-        /* TODO: Maybe don't name the key for this entity the same thing as its userName property. */
+        /* Give the key for this entity the same name as its userName property. */
         Entity personEntity = new Entity("Person", person.getUserName(), this.defaultGroupKey);
 
         personEntity.setProperty("userName", person.getUserName());
@@ -97,6 +98,8 @@ public class WebAPIController {
     @RequestMapping(value="/people/{userName}", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePerson(@RequestBody Person person, @PathVariable String userName) {
 
+        /* TODO: Make sure that the provided Person is valid. */
+
         /* Check if this person exists. */
         Query.Filter filter =
                 new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
@@ -108,9 +111,11 @@ public class WebAPIController {
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
 
         if (null == personEntity) {
-            logger.warning("Attempted to update a Person that does not exist.");
-            return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
+            String message = "Attempted to update a Person that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
+
 
         /* No update operation in Google Datastore, so replace old Person with updated one. */
         /* Note that this currently allows a person's username to be updated. */
@@ -143,8 +148,9 @@ public class WebAPIController {
 
             /* Check if each person exists. */
             if (null == personEntity) {
-                logger.warning("Attempted to update a Person that does not exist.");
-                return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
+                String message = "Attempted to update a Person that does not exist.";
+                logger.warning(message);
+                return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
             }
 
             personEntities.add(personEntity);
@@ -177,8 +183,6 @@ public class WebAPIController {
         personQuery.setAncestor(this.defaultGroupKey);
 
         personQuery.setKeysOnly();
-
-        /* TODO: Is it possible to fetch all people by just specifying the default ancestor key? */
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
 
