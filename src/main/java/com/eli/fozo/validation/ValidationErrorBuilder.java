@@ -1,4 +1,4 @@
-package validation;
+package com.eli.fozo.validation;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;

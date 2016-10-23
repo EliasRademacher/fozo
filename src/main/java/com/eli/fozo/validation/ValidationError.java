@@ -1,4 +1,4 @@
-package validation;
+package com.eli.fozo.validation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 
 /**
- * Simply a class to hold validation errors, as described on
+ * Simply a class to hold com.eli.fozo.validation errors, as described on
  * http://blog.codeleak.pl/2013/09/request-body-validation-in-spring-mvc-3.2.html
  *
  */

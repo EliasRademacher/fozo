@@ -1,12 +1,14 @@
 package com.eli.fozo.controller;
 
 import com.eli.fozo.model.Person;
+import com.eli.fozo.validation.ValidationError;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import validation.ValidationErrorBuilder;
+import com.eli.fozo.validation.ValidationErrorBuilder;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -65,12 +67,24 @@ public class WebAPIController {
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
-    @RequestMapping(value="/people", method=RequestMethod.POST)
-    public ResponseEntity<?> createPerson(@Valid @RequestBody Person person, Errors errors) {
 
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(ValidationErrorBuilder.fromBindingErrors(errors));
-        }
+
+
+    @ExceptionHandler
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ValidationError handleException(MethodArgumentNotValidException exception) {
+        return createValidationError(exception);
+    }
+
+    private ValidationError createValidationError(MethodArgumentNotValidException exception) {
+        return ValidationErrorBuilder.fromBindingErrors(exception.getBindingResult());
+    }
+
+
+
+
+    @RequestMapping(value="/people", method=RequestMethod.POST)
+    public ResponseEntity<?> createPerson(@Valid @RequestBody Person person) {
 
         /* Make sure this person does not already exist. */
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
