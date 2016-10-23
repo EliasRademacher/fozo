@@ -65,7 +65,18 @@ public class WebAPIController {
     @RequestMapping(value="/people", method=RequestMethod.POST)
     public ResponseEntity<?> createPerson(@RequestBody Person person) {
 
-        /* TODO: Make sure person does not already exist. */
+        /* Make sure this person does not already exist. */
+        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
+        Query personQuery = new Query("Person").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        personQuery.setAncestor(this.defaultGroupKey);
+
+        if (null != this.datastore.prepare(personQuery).asSingleEntity()) {
+            logger.warning("Attempted to create a Person with a userName that already exists.");
+            return new ResponseEntity<Object>(HttpStatus.FORBIDDEN);
+        }
+
 
         person.setJoinDate(new Date());
 
