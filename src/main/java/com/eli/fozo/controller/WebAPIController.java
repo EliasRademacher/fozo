@@ -4,10 +4,7 @@ import com.eli.fozo.model.Person;
 import com.google.appengine.api.datastore.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +35,14 @@ public class WebAPIController {
         }
 
         return people;
+    }
+
+    @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
+    public Person people(@PathVariable String userName) {
+        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
+        Query personQuery = new Query("Person").setFilter(filter);
+        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+        return new Person(personEntity);
     }
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
