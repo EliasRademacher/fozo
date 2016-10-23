@@ -66,22 +66,6 @@ public class WebAPIController {
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
-
-
-//
-//    @ExceptionHandler
-//    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-//    public ValidationError handleException(MethodArgumentNotValidException exception) {
-//        return createValidationError(exception);
-//    }
-//
-//    private ValidationError createValidationError(MethodArgumentNotValidException exception) {
-//        return ValidationErrorBuilder.fromBindingErrors(exception.getBindingResult());
-//    }
-//
-
-
-
     @RequestMapping(value="/people", method=RequestMethod.POST)
     public ResponseEntity<?> createPerson(@Valid @RequestBody Person person) {
 
