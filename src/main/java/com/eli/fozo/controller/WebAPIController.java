@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Created by Elias on 10/22/2016.
+ * Created by Elias Rademacher on 10/22/2016.
+ *
  */
 
 @RestController
@@ -23,7 +24,7 @@ public class WebAPIController {
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @RequestMapping(value="/people", method=RequestMethod.GET)
-    public List<Person> people() {
+    public List<Person> getPeople() {
         Query personQuery = new Query("Person");
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
@@ -38,7 +39,7 @@ public class WebAPIController {
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
-    public Person people(@PathVariable String userName) {
+    public Person getPerson(@PathVariable String userName) {
         Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
         Query personQuery = new Query("Person").setFilter(filter);
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
@@ -46,7 +47,7 @@ public class WebAPIController {
     }
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
-    public ResponseEntity<?> people(@RequestBody Person person) {
+    public ResponseEntity<?> createPerson(@RequestBody Person person) {
 
         person.setJoinDate(new Date());
 
@@ -58,6 +59,33 @@ public class WebAPIController {
         personEntity.setProperty("ethnicity", person.getEthnicity());
         personEntity.setProperty("joinDate", person.getJoinDate());
         personEntity.setProperty("usCitizen", person.isUsCitizen());
+        this.datastore.put(personEntity);
+
+        return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value="/people/{userName}", method=RequestMethod.PUT)
+    public ResponseEntity<?> updatePerson(@RequestBody Person person, @PathVariable String userName) {
+
+        /* Check if this person exists. */
+        Query.Filter filter =
+                new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
+        Query personQuery = new Query("Person").setFilter(filter);
+        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+
+        if (null == personEntity) {
+            return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+        }
+
+        /* No update operation in Google Datastore, so replace old Person with updated one. */
+        /* Note that this currently allows a person's username to be updated. */
+        personEntity.setProperty("userName", person.getUserName());
+        personEntity.setProperty("birthDate", person.getBirthDate());
+        personEntity.setProperty("email", person.getEmail());
+        personEntity.setProperty("ethnicity", person.getEthnicity());
+        personEntity.setProperty("joinDate", person.getJoinDate());
+        personEntity.setProperty("usCitizen", person.isUsCitizen());
+        personEntity.setProperty("joinDate", person.getJoinDate());
         this.datastore.put(personEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
