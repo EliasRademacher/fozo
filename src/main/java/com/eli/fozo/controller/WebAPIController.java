@@ -77,7 +77,8 @@ public class WebAPIController {
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
 
         if (null == personEntity) {
-            return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+            logger.warning("Attempted to update a Person that does not exist.");
+            return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
         }
 
         /* No update operation in Google Datastore, so replace old Person with updated one. */
@@ -107,7 +108,8 @@ public class WebAPIController {
 
             /* Check if each person exists. */
             if (null == personEntity) {
-                return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+                logger.warning("Attempted to update a Person that does not exist.");
+                return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
             }
 
             personEntities.add(personEntity);
@@ -129,7 +131,7 @@ public class WebAPIController {
             this.datastore.put(personEntity);
         }
 
-        return new ResponseEntity<Object>(HttpStatus.CREATED);
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @RequestMapping(value="/people", method=RequestMethod.DELETE)
