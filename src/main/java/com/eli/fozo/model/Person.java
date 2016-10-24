@@ -1,6 +1,7 @@
 package com.eli.fozo.model;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,9 +33,9 @@ public class Person {
     @NotNull(message="Citizenship must be either true or false.")
     private Boolean usCitizen;
 
-    private List<Challenge> challengesCompleted;
+    private List<Key> challengesCompleted;
 
-    private List<Challenge> challengesPending;
+    private List<Key> challengesPending;
 
     public Person() {
         this.challengesPending = new ArrayList<>();
@@ -63,8 +64,8 @@ public class Person {
         this.joinDate = (Date) entity.getProperty("joinDate");
         this.email = (String) entity.getProperty("email");
         this.usCitizen = (Boolean) entity.getProperty("usCitizen");
-        this.challengesPending = (List<Challenge>) entity.getProperty("challengesPending");
-        this.challengesCompleted = (List<Challenge>) entity.getProperty("challengesCompleted");
+        this.challengesPending = (List<Key>) entity.getProperty("challengesPending");
+        this.challengesCompleted = (List<Key>) entity.getProperty("challengesCompleted");
     }
 
     public String getUserName() {
@@ -115,27 +116,27 @@ public class Person {
         this.usCitizen = usCitizen;
     }
 
-    public List<Challenge> getChallengesCompleted() {
+    public List<Key> getChallengesCompleted() {
         return challengesCompleted;
     }
 
-    public void setChallengesCompleted(List<Challenge> challengesCompleted) {
+    public void setChallengesCompleted(List<Key> challengesCompleted) {
         this.challengesCompleted = challengesCompleted;
     }
 
-    public List<Challenge> getChallengesPending() {
+    public List<Key> getChallengesPending() {
         return challengesPending;
     }
 
-    public void setChallengesPending(List<Challenge> challengesPending) {
+    public void setChallengesPending(List<Key> challengesPending) {
         this.challengesPending = challengesPending;
     }
 
-    public void addChallenge(Challenge challenge) {
+    public void addChallenge(Key challenge) {
         this.challengesPending.add(challenge);
     }
 
-    public void completeChallenge(Challenge challenge) {
+    public void completeChallenge(Key challenge) {
         this.challengesCompleted.add(challenge);
         this.challengesPending.remove(challenge);
     }
