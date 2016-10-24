@@ -142,7 +142,7 @@ public class PersonController {
 
 
 
-    @RequestMapping(value="/people/{userName}/challenge/{id}", method=RequestMethod.PUT)
+    @RequestMapping(value="/people/{userName}/challenges/{id}", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePerson(
             /*@RequestBody Challenge challenge,*/
             @PathVariable String userName,
@@ -179,7 +179,7 @@ public class PersonController {
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
 
-        Set<Challenge> challengesPending = (Set<Challenge>) personEntity.getProperty("challengesPending");
+        List<Challenge> challengesPending = (List<Challenge>) personEntity.getProperty("challengesPending");
 
         Challenge newChallenge = new Challenge(challengeEntity);
         challengesPending.add(newChallenge);

@@ -5,9 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Elias on 10/6/2016.
@@ -34,11 +32,13 @@ public class Person {
     @NotNull(message="Citizenship must be either true or false.")
     private Boolean usCitizen;
 
-    private Set<Challenge> challengesCompleted;
+    private List<Challenge> challengesCompleted;
 
-    private Set<Challenge> challengesPending;
+    private List<Challenge> challengesPending;
 
     public Person() {
+        this.challengesPending = new ArrayList<>();
+        this.challengesCompleted = new ArrayList<>();
     }
 
     public Person(String userName, String ethnicity, Date birthDate, String email, Boolean usCitizen) {
@@ -46,8 +46,8 @@ public class Person {
     }
 
     public Person(String userName, String ethnicity, Date birthDate, Date joinDate, String email, Boolean usCitizen) {
-        this.challengesPending = new HashSet<>();
-        this.challengesCompleted = new HashSet<>();
+        this.challengesPending = new ArrayList<>();
+        this.challengesCompleted = new ArrayList<>();
         this.userName = userName;
         this.ethnicity = ethnicity;
         this.birthDate = birthDate;
@@ -63,6 +63,8 @@ public class Person {
         this.joinDate = (Date) entity.getProperty("joinDate");
         this.email = (String) entity.getProperty("email");
         this.usCitizen = (Boolean) entity.getProperty("usCitizen");
+        this.challengesPending = (List<Challenge>) entity.getProperty("challengesPending");
+        this.challengesCompleted = (List<Challenge>) entity.getProperty("challengesCompleted");
     }
 
     public String getUserName() {
@@ -113,19 +115,19 @@ public class Person {
         this.usCitizen = usCitizen;
     }
 
-    public Set<Challenge> getChallengesCompleted() {
+    public List<Challenge> getChallengesCompleted() {
         return challengesCompleted;
     }
 
-    public void setChallengesCompleted(Set<Challenge> challengesCompleted) {
+    public void setChallengesCompleted(List<Challenge> challengesCompleted) {
         this.challengesCompleted = challengesCompleted;
     }
 
-    public Set<Challenge> getChallengesPending() {
+    public List<Challenge> getChallengesPending() {
         return challengesPending;
     }
 
-    public void setChallengesPending(Set<Challenge> challengesPending) {
+    public void setChallengesPending(List<Challenge> challengesPending) {
         this.challengesPending = challengesPending;
     }
 
