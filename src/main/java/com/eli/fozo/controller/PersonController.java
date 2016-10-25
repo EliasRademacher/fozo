@@ -264,9 +264,12 @@ public class PersonController {
         /* Ancestor queries are guaranteed to maintain strong consistency. */
         personQuery.setAncestor(this.defaultGroupKey);
 
-        personQuery.setKeysOnly();
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+        List<Key> challengeEntitiesToDelete = (List<Key>) personEntity.getProperty("challengesPending");
+
         this.datastore.delete(personEntity.getKey());
+        this.datastore.delete(challengeEntitiesToDelete);
+
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
