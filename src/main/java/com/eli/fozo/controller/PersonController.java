@@ -179,10 +179,14 @@ public class PersonController {
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
 
-        List<Challenge> challengesPending = (List<Challenge>) personEntity.getProperty("challengesPending");
+        List<Key> challengesPending = (List<Key>) personEntity.getProperty("challengesPending");
 
-        Challenge newChallenge = new Challenge(challengeEntity);
-        challengesPending.add(newChallenge);
+        if (null == challengesPending) {
+            /* The list of pending challenges has not been previously initialized. */
+            challengesPending = new ArrayList<Key>();
+        }
+
+        challengesPending.add(challengeEntity.getKey());
         personEntity.setProperty("challengesPending", challengesPending);
 
         this.datastore.put(personEntity);
