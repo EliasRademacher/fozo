@@ -8,10 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -245,13 +242,17 @@ public class PersonController {
         /* Ancestor queries are guaranteed to maintain strong consistency. */
         personQuery.setAncestor(this.defaultGroupKey);
 
-        personQuery.setKeysOnly();
         List<Entity> allPeopleEntities =
                 this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
 
+        List<Key> challengeEntitiesToDelete = new ArrayList<>();
+
         for (Entity entity : allPeopleEntities) {
+            challengeEntitiesToDelete.addAll((List<Key>) entity.getProperty("challengesPending"));
             this.datastore.delete(entity.getKey());
         }
+
+        this.datastore.delete(challengeEntitiesToDelete);
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
