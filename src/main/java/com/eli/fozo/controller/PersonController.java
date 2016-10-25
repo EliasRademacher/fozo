@@ -102,7 +102,7 @@ public class PersonController {
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.PUT)
-    public ResponseEntity<?> updatePerson(@RequestBody Person person, @PathVariable String userName) {
+    public ResponseEntity<?> updatePerson(@Valid @RequestBody Person person, @PathVariable String userName) {
 
         /* TODO: Make sure that the provided Person is valid. */
 
@@ -143,12 +143,7 @@ public class PersonController {
 
 
     @RequestMapping(value="/people/{userName}/challenges/{id}", method=RequestMethod.PUT)
-    public ResponseEntity<?> updatePerson(
-            /*@RequestBody Challenge challenge,*/
-            @PathVariable String userName,
-            @PathVariable long id) {
-
-        /* TODO: Make sure that the provided Person is valid. */
+    public ResponseEntity<?> updatePerson(@PathVariable String userName, @PathVariable long id) {
 
         /* Check if this person exists. */
         Query.Filter filter =
@@ -198,7 +193,7 @@ public class PersonController {
 
 
     @RequestMapping(value="/people", method=RequestMethod.PUT)
-    public ResponseEntity<?> updatePeople(@RequestBody List<Person> people) {
+    public ResponseEntity<?> updatePeople(@Valid @RequestBody List<Person> people) {
 
         List<Entity> personEntities = new ArrayList<>();
 
