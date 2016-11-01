@@ -1,7 +1,7 @@
 package com.eli.fozo.controller;
 
-import com.eli.fozo.model.Challenge;
 import com.google.appengine.api.datastore.*;
+import model.Challenge;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
