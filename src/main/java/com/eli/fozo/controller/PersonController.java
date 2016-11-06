@@ -2,7 +2,9 @@ package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
 import model.Person;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +47,12 @@ public class PersonController {
             people.add(new Person(entity));
         }
 
-        return new ResponseEntity<>(people, HttpStatus.OK);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
+        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(acceptableMediaTypes);
+
+        return new ResponseEntity<>(people, requestHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
