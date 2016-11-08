@@ -71,7 +71,13 @@ public class PersonController {
 
         Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
         Person person = new Person(personEntity);
-        return new ResponseEntity<>(person, HttpStatus.OK);
+
+        HttpHeaders requestHeaders = new HttpHeaders();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
+        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(acceptableMediaTypes);
+
+        return new ResponseEntity<>(person, requestHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people", method=RequestMethod.POST)
