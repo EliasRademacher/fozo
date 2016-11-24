@@ -1,7 +1,7 @@
 package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.users.User;
+import model.Account;
 import model.Person;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,29 +33,25 @@ public class PersonController {
         datastore.put(defaultGroup);
     }
 
-    @RequestMapping(value="/users", method=RequestMethod.GET)
-    public ResponseEntity<List<User>> getUsers() {
-        Query userQuery = new Query("User");
+
+    /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
+    @RequestMapping(value="/accounts", method=RequestMethod.GET)
+    public ResponseEntity<List<Account>> getAccount() {
+        Query accountQuery = new Query("Account");
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        userQuery.setAncestor(this.defaultGroupKey);
-        List<Entity> allUserEntities =
-                this.datastore.prepare(userQuery).asList(FetchOptions.Builder.withDefaults());
+        accountQuery.setAncestor(this.defaultGroupKey);
+        List<Entity> allAccountEntities =
+                this.datastore.prepare(accountQuery).asList(FetchOptions.Builder.withDefaults());
 
-        List<User> users = new ArrayList<>();
+        List<Account> accounts = new ArrayList<>();
 
-        String email;
-        String authDomain;
         String userId;
-        for (Entity entity : allUserEntities) {
 
-            /* TODO: How to you set a User's nickname? */
-            email = (String) entity.getProperty("email");
-            authDomain = (String) entity.getProperty("authDomain");
+        for (Entity entity : allAccountEntities) {
             userId = (String) entity.getProperty("userId");
-
-            User user = new User(email, authDomain, userId);
-            users.add(user);
+            Account account = new Account(userId);
+            accounts.add(account);
         }
 
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -63,7 +59,7 @@ public class PersonController {
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
 
-        return new ResponseEntity<>(users, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<List<Account>>(accounts, requestHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
