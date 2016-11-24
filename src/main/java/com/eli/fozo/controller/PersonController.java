@@ -1,6 +1,7 @@
 package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.users.User;
 import model.Person;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,25 +33,29 @@ public class PersonController {
         datastore.put(defaultGroup);
     }
 
-    @RequestMapping(value="/quote", method=RequestMethod.GET)
-    public String getQuote() {
-        String quote = "Twenty years from now you will be more disappointed by the things that you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sails. Explore. Dream. Discover.";
-        return quote;
-    }
-
-    @RequestMapping(value="/people", method=RequestMethod.GET)
-    public ResponseEntity<List<Person>> getPeople() {
-        Query personQuery = new Query("Person");
+    @RequestMapping(value="/users", method=RequestMethod.GET)
+    public ResponseEntity<List<User>> getUsers() {
+        Query userQuery = new Query("User");
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
-        List<Entity> allPeopleEntities =
-                this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
+        userQuery.setAncestor(this.defaultGroupKey);
+        List<Entity> allUserEntities =
+                this.datastore.prepare(userQuery).asList(FetchOptions.Builder.withDefaults());
 
-        List<Person> people = new ArrayList<>();
+        List<User> users = new ArrayList<>();
 
-        for (Entity entity : allPeopleEntities) {
-            people.add(new Person(entity));
+        String email;
+        String authDomain;
+        String userId;
+        for (Entity entity : allUserEntities) {
+
+            /* TODO: How to you set a User's nickname? */
+            email = (String) entity.getProperty("email");
+            authDomain = (String) entity.getProperty("authDomain");
+            userId = (String) entity.getProperty("userId");
+
+            User user = new User(email, authDomain, userId);
+            users.add(user);
         }
 
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -58,7 +63,7 @@ public class PersonController {
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
 
-        return new ResponseEntity<>(people, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(users, requestHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
@@ -76,6 +81,7 @@ public class PersonController {
         List<MediaType> acceptableMediaTypes = new ArrayList<>();
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
+
 
         return new ResponseEntity<>(person, requestHeaders, HttpStatus.OK);
     }
