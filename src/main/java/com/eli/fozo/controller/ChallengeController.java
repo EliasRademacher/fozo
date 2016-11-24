@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 @RestController
 public class ChallengeController {
 
-    private static final Logger logger = Logger.getLogger(PersonController.class.getName());
+    private static final Logger logger = Logger.getLogger(AccountController.class.getName());
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 

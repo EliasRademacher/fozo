@@ -19,15 +19,15 @@ import java.util.logging.Logger;
  */
 
 @RestController
-public class PersonController {
+public class AccountController {
 
-    private static final Logger logger = Logger.getLogger(PersonController.class.getName());
+    private static final Logger logger = Logger.getLogger(AccountController.class.getName());
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     private Key defaultGroupKey;
 
-    public PersonController() {
+    public AccountController() {
         Entity defaultGroup = new Entity("personGroup", "defaultGroup");
         this.defaultGroupKey = defaultGroup.getKey();
         datastore.put(defaultGroup);
