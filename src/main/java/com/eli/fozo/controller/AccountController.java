@@ -51,6 +51,13 @@ public class AccountController {
         for (Entity entity : allAccountEntities) {
             userId = (String) entity.getProperty("userId");
             Account account = new Account(userId);
+
+            List<Key> challengesCompleted = (List<Key>) entity.getProperty("challengesCompleted");
+            account.setChallengesCompleted(challengesCompleted);
+
+            List<Key> challengesPending = (List<Key>) entity.getProperty("challengesPending");
+            account.setChallengesPending(challengesPending);
+
             accounts.add(account);
         }
 
@@ -59,27 +66,33 @@ public class AccountController {
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
 
-        return new ResponseEntity<List<Account>>(accounts, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(accounts, requestHeaders, HttpStatus.OK);
     }
 
-    @RequestMapping(value="/people/{userName}", method=RequestMethod.GET)
-    public ResponseEntity<Person> getPerson(@PathVariable String userName) {
-        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
-        Query personQuery = new Query("Person").setFilter(filter);
+    @RequestMapping(value="/accounts/{userId}", method=RequestMethod.GET)
+    public ResponseEntity<Account> getAccount(@PathVariable String userId) {
+        Query.Filter filter =
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query accountQuery = new Query("Account").setFilter(filter);
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
+        accountQuery.setAncestor(this.defaultGroupKey);
 
-        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
-        Person person = new Person(personEntity);
+        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
+        Account account = new Account(userId);
+
+        List<Key> challengesCompleted = (List<Key>) accountEntity.getProperty("challengesCompleted");
+        account.setChallengesCompleted(challengesCompleted);
+
+        List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
+        account.setChallengesPending(challengesPending);
 
         HttpHeaders requestHeaders = new HttpHeaders();
         List<MediaType> acceptableMediaTypes = new ArrayList<>();
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
 
-
-        return new ResponseEntity<>(person, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(account, requestHeaders, HttpStatus.OK);
     }
 
     /* You can't create a User without an account. */
