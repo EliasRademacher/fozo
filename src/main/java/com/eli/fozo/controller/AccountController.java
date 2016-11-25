@@ -128,42 +128,35 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
 
+    @RequestMapping(value="/accounts/{userId}", method=RequestMethod.PUT)
+    public ResponseEntity<?> updateAccount(@Valid @RequestBody Account account, @PathVariable String userId) {
 
-    @RequestMapping(value="/people/{userName}", method=RequestMethod.PUT)
-    public ResponseEntity<?> updatePerson(@Valid @RequestBody Person person, @PathVariable String userName) {
+        /* TODO: Make sure that the provided Account is valid. */
 
-        /* TODO: Make sure that the provided Person is valid. */
-
-        /* Check if this person exists. */
+        /* Check if this account exists. */
         Query.Filter filter =
-                new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
-        Query personQuery = new Query("Person").setFilter(filter);
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query accountQuery = new Query("Account").setFilter(filter);
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
+        accountQuery.setAncestor(this.defaultGroupKey);
 
-        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
 
-        if (null == personEntity) {
+        if (null == accountEntity) {
             /* TODO: Handle this in the ControllerAdvice class. */
-            String message = "Attempted to update a Person that does not exist.";
+            String message = "Attempted to update an Account that does not exist.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
 
 
-        /* No update operation in Google Datastore, so replace old Person with updated one. */
-        /* Note that this currently allows a person's username to be updated. */
-        personEntity.setProperty("userName", person.getUserName());
-        personEntity.setProperty("birthDate", person.getBirthDate());
-        personEntity.setProperty("email", person.getEmail());
-        personEntity.setProperty("ethnicity", person.getEthnicity());
-        personEntity.setProperty("joinDate", person.getJoinDate());
-        personEntity.setProperty("usCitizen", person.isUsCitizen());
-        personEntity.setProperty("joinDate", person.getJoinDate());
-        personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
-        personEntity.setProperty("challengesPending", person.getChallengesPending());
-        this.datastore.put(personEntity);
+        /* No update operation in Google Datastore, so replace old Account with updated one. */
+        accountEntity.setProperty("userId", account.getUserId());
+        accountEntity.setProperty("challengesCompleted", account.getChallengesCompleted());
+        accountEntity.setProperty("challengesPending", account.getChallengesPending());
+
+        this.datastore.put(accountEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
