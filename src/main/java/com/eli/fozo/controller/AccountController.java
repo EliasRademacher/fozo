@@ -253,24 +253,30 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
-    @RequestMapping(value="/people", method=RequestMethod.DELETE)
-    public ResponseEntity<?> deletePeople() {
-        Query personQuery = new Query("Person");
+    @RequestMapping(value="/accounts", method=RequestMethod.DELETE)
+    public ResponseEntity<?> deleteAccounts() {
+        Query accountQuery = new Query("Account");
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
+        accountQuery.setAncestor(this.defaultGroupKey);
 
-        List<Entity> allPeopleEntities =
-                this.datastore.prepare(personQuery).asList(FetchOptions.Builder.withDefaults());
+        List<Entity> allAccountEntities =
+                this.datastore.prepare(accountQuery).asList(FetchOptions.Builder.withDefaults());
 
-        List<Key> challengeEntitiesToDelete = new ArrayList<>();
+        List<Key> accountEntitiesToDelete = new ArrayList<>();
 
-        for (Entity entity : allPeopleEntities) {
-            challengeEntitiesToDelete.addAll((List<Key>) entity.getProperty("challengesPending"));
+        /* Clean up Challenges associated with Accounts before you delete the Accounts. */
+        for (Entity entity : allAccountEntities) {
+            List<Key> challengesPendingKeys = (List<Key>) entity.getProperty("challengesPending");
+            if (null != challengesPendingKeys) {
+                accountEntitiesToDelete.addAll(challengesPendingKeys);
+            /* TODO: Don't forget to also delete challengesCompleted when that is implemented. */
+            }
+
             this.datastore.delete(entity.getKey());
         }
 
-        this.datastore.delete(challengeEntitiesToDelete);
+        this.datastore.delete(accountEntitiesToDelete);
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
