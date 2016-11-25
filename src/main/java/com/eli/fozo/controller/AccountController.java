@@ -36,7 +36,7 @@ public class AccountController {
 
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
     @RequestMapping(value="/accounts", method=RequestMethod.GET)
-    public ResponseEntity<List<Account>> getAccount() {
+    public ResponseEntity<List<Account>> getAccounts() {
         Query accountQuery = new Query("Account");
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
@@ -82,41 +82,39 @@ public class AccountController {
         return new ResponseEntity<>(person, requestHeaders, HttpStatus.OK);
     }
 
-    @RequestMapping(value="/people", method=RequestMethod.POST)
-    public ResponseEntity<?> createPerson(@Valid @RequestBody Person person) {
+    /* You can't create a User without an account. */
+    @RequestMapping(value="/account", method=RequestMethod.POST)
+    public ResponseEntity<?> createAccount(@Valid @RequestBody Account account) {
 
-        /* Make sure this person does not already exist. */
-        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
-        Query personQuery = new Query("Person").setFilter(filter);
+        /* Make sure this account does not already exist. */
+        Query.Filter filter = new Query.FilterPredicate(
+                "userId",
+                Query.FilterOperator.EQUAL,
+                account.getUserId()
+        );
+
+        Query personQuery = new Query("Account").setFilter(filter);
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
         personQuery.setAncestor(this.defaultGroupKey);
 
         if (null != this.datastore.prepare(personQuery).asSingleEntity()) {
-            String message = "Attempted to create a Person with a userName that already exists.";
+            String message = "Attempted to create an Account with a user ID that already exists.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
 
+        /* Give the key for this entity the same as its userId property. */
+        Entity accountEntity = new Entity("Account", account.getUserId(), this.defaultGroupKey);
 
-        person.setJoinDate(new Date());
-
-        /* Give the key for this entity the same name as its userName property. */
-        Entity personEntity = new Entity("Person", person.getUserName(), this.defaultGroupKey);
-
-        personEntity.setProperty("userName", person.getUserName());
-        personEntity.setProperty("birthDate", person.getBirthDate());
-        personEntity.setProperty("email", person.getEmail());
-        personEntity.setProperty("ethnicity", person.getEthnicity());
-        personEntity.setProperty("joinDate", person.getJoinDate());
-        personEntity.setProperty("usCitizen", person.isUsCitizen());
-        personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
-        personEntity.setProperty("challengesPending", person.getChallengesPending());
-
-        this.datastore.put(personEntity);
+        accountEntity.setProperty("userId", account.getUserId());
+        accountEntity.setProperty("challengesCompleted", account.getChallengesCompleted());
+        accountEntity.setProperty("challengesPending", account.getChallengesPending());
+        this.datastore.put(accountEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
+
 
     @RequestMapping(value="/people/{userName}", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePerson(@Valid @RequestBody Person person, @PathVariable String userName) {
@@ -156,8 +154,6 @@ public class AccountController {
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
-
-
 
     @RequestMapping(value="/people/{userName}/challenges/{id}", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePerson(@PathVariable String userName, @PathVariable long id) {
@@ -205,9 +201,6 @@ public class AccountController {
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
-
-
-
 
     @RequestMapping(value="/people", method=RequestMethod.PUT)
     public ResponseEntity<?> updatePeople(@Valid @RequestBody List<Person> people) {
