@@ -2,7 +2,6 @@ package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
 import model.Account;
-import model.Person;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -212,47 +211,43 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(value="/people", method=RequestMethod.PUT)
-    public ResponseEntity<?> updatePeople(@Valid @RequestBody List<Person> people) {
+    @RequestMapping(value="/accounts", method=RequestMethod.PUT)
+    public ResponseEntity<?> updateAccounts(@Valid @RequestBody List<Account> accounts) {
 
-        List<Entity> personEntities = new ArrayList<>();
+        List<Entity> accountEntities = new ArrayList<>();
 
-        for (Person person : people) {
-            Query.Filter filter =
-                    new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, person.getUserName());
-            Query personQuery = new Query("Person").setFilter(filter);
+        for (Account account : accounts) {
+            Query.Filter filter = new Query.FilterPredicate(
+                    "userId",
+                    Query.FilterOperator.EQUAL,
+                    account.getUserId()
+            );
+            Query accountQuery = new Query("Account").setFilter(filter);
 
             /* Ancestor queries are guaranteed to maintain strong consistency. */
-            personQuery.setAncestor(this.defaultGroupKey);
+            accountQuery.setAncestor(this.defaultGroupKey);
 
-            Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
+            Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
 
-            /* Check if each person exists. */
-            if (null == personEntity) {
-                String message = "Attempted to update a Person that does not exist.";
+            /* Check if each account exists. */
+            if (null == accountEntity) {
+                String message = "Attempted to update an Account that does not exist.";
                 logger.warning(message);
                 return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
             }
 
-            personEntities.add(personEntity);
+            accountEntities.add(accountEntity);
         }
 
-        for (int i = 0; i < people.size(); i++) {
-            Person person = people.get(i);
-            Entity personEntity = personEntities.get(i);
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            Entity accountEntity = accountEntities.get(i);
 
-            /* No update operation in Google Datastore, so replace old Person with updated one. */
-            /* Note that this currently allows a person's username to be updated. */
-            personEntity.setProperty("userName", person.getUserName());
-            personEntity.setProperty("birthDate", person.getBirthDate());
-            personEntity.setProperty("email", person.getEmail());
-            personEntity.setProperty("ethnicity", person.getEthnicity());
-            personEntity.setProperty("joinDate", person.getJoinDate());
-            personEntity.setProperty("usCitizen", person.isUsCitizen());
-            personEntity.setProperty("joinDate", person.getJoinDate());
-            personEntity.setProperty("challengesCompleted", person.getChallengesCompleted());
-            personEntity.setProperty("challengesPending", person.getChallengesPending());
-            this.datastore.put(personEntity);
+            /* No update operation in Google Datastore, so replace old Account with updated one. */
+            accountEntity.setProperty("userId", account.getUserId());
+            accountEntity.setProperty("challengesCompleted", account.getChallengesCompleted());
+            accountEntity.setProperty("challengesPending", account.getChallengesPending());
+            this.datastore.put(accountEntity);
         }
 
         return new ResponseEntity<Object>(HttpStatus.OK);
