@@ -69,7 +69,7 @@ public class AccountController {
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.GET)
-    public ResponseEntity<Account> getAccount(@PathVariable String userId) {
+    public ResponseEntity<?> getAccount(@PathVariable String userId) {
         Query.Filter filter =
                 new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
         Query accountQuery = new Query("Account").setFilter(filter);
@@ -78,6 +78,20 @@ public class AccountController {
         accountQuery.setAncestor(this.defaultGroupKey);
 
         Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
+
+        if (null == accountEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to retrieve an Account that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        /* TODO: Consider extracting creating of HTTP headers to separate method. */
+        HttpHeaders requestHeaders = new HttpHeaders();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
+        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(acceptableMediaTypes);
+
         Account account = new Account(userId);
 
         List<Key> challengesCompleted = (List<Key>) accountEntity.getProperty("challengesCompleted");
@@ -86,16 +100,11 @@ public class AccountController {
         List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
         account.setChallengesPending(challengesPending);
 
-        HttpHeaders requestHeaders = new HttpHeaders();
-        List<MediaType> acceptableMediaTypes = new ArrayList<>();
-        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
-        requestHeaders.setAccept(acceptableMediaTypes);
-
         return new ResponseEntity<>(account, requestHeaders, HttpStatus.OK);
     }
 
     /* You can't create a User without an account. */
-    @RequestMapping(value="/account", method=RequestMethod.POST)
+    @RequestMapping(value="/accounts", method=RequestMethod.POST)
     public ResponseEntity<?> createAccount(@Valid @RequestBody Account account) {
 
         /* Make sure this account does not already exist. */
@@ -148,7 +157,6 @@ public class AccountController {
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
-
 
         /* No update operation in Google Datastore, so replace old Account with updated one. */
         accountEntity.setProperty("userId", account.getUserId());
@@ -281,21 +289,24 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
-    @RequestMapping(value="/people/{userName}", method=RequestMethod.DELETE)
-    public ResponseEntity<?> deletePerson(@PathVariable String userName) {
-        Query.Filter filter = new Query.FilterPredicate("userName", Query.FilterOperator.EQUAL, userName);
-        Query personQuery = new Query("Person").setFilter(filter);
+    @RequestMapping(value="/accounts/{userId}", method=RequestMethod.DELETE)
+    public ResponseEntity<?> deleteAccount(@PathVariable String userId) {
+        Query.Filter filter = new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query accountQuery = new Query("Account").setFilter(filter);
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
+        accountQuery.setAncestor(this.defaultGroupKey);
 
-        Entity personEntity = this.datastore.prepare(personQuery).asSingleEntity();
-        List<Key> challengeEntitiesToDelete = (List<Key>) personEntity.getProperty("challengesPending");
+        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
+        List<Key> challengeEntitiesToDelete = (List<Key>) accountEntity.getProperty("challengesPending");
+        /* TODO: Also delete associated completed challenges. */
 
-        this.datastore.delete(personEntity.getKey());
-        this.datastore.delete(challengeEntitiesToDelete);
+        this.datastore.delete(accountEntity.getKey());
+
+        if (null != challengeEntitiesToDelete) {
+            this.datastore.delete(challengeEntitiesToDelete);
+        }
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
-
 }
