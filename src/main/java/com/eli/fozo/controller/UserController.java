@@ -38,13 +38,7 @@ public class UserController {
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
 
-        /* Give the key for this entity the same as its userId property. */
-        Entity userEntity = new Entity("User", user.getUserId());
-
-        userEntity.setProperty("userId", user.getUserId());
-        userEntity.setProperty("email", user.getEmail());
-        userEntity.setProperty("authDomain", user.getAuthDomain());
-        this.datastore.put(userEntity);
+        userRepo.put(user);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }

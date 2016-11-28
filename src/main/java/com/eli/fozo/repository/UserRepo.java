@@ -2,6 +2,7 @@ package com.eli.fozo.repository;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.User;
 
@@ -24,6 +25,15 @@ public class UserRepo {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
+    }
+
+    public void put(User user) {
+        /* Give the key for this entity the same as its userId property. */
+        Entity userEntity = new Entity("User", user.getUserId());
+        userEntity.setProperty("userId", user.getUserId());
+        userEntity.setProperty("email", user.getEmail());
+        userEntity.setProperty("authDomain", user.getAuthDomain());
+        datastore.put(userEntity);
     }
 
 
