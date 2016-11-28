@@ -36,5 +36,15 @@ public class UserRepo {
         datastore.put(userEntity);
     }
 
+    public User get(String userId) {
+        Query.Filter filter =
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query userQuery = new Query("User").setFilter(filter);
+        Entity userEntity = datastore.prepare(userQuery).asSingleEntity();
+        String email = (String) userEntity.getProperty("email");
+        String authDomain = (String) userEntity.getProperty("authDomain");
+        return new User(email, authDomain, userId);
+    }
+
 
 }

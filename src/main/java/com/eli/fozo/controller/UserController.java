@@ -52,12 +52,7 @@ public class UserController {
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
 
-
-        Query.Filter filter =
-                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
-        Query userQuery = new Query("User").setFilter(filter);
-        Entity userEntity = this.datastore.prepare(userQuery).asSingleEntity();
-
+        User user = userRepo.get(userId);
 
         /* TODO: Consider extracting creating of HTTP headers to separate method. */
         HttpHeaders requestHeaders = new HttpHeaders();
@@ -65,11 +60,8 @@ public class UserController {
         acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
         requestHeaders.setAccept(acceptableMediaTypes);
 
-        String email = (String) userEntity.getProperty("email");
-        String authDomain = (String) userEntity.getProperty("authDomain");
-        User account = new User(email, authDomain, userId);
 
-        return new ResponseEntity<>(account, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(user, requestHeaders, HttpStatus.OK);
     }
 
 }
