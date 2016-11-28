@@ -27,7 +27,7 @@ public class AccountController {
     private Key defaultGroupKey;
 
     public AccountController() {
-        Entity defaultGroup = new Entity("personGroup", "defaultGroup");
+        Entity defaultGroup = new Entity("AccountGroup", "defaultGroup");
         this.defaultGroupKey = defaultGroup.getKey();
         datastore.put(defaultGroup);
     }
@@ -106,6 +106,7 @@ public class AccountController {
     /* You can't create a User without an account. */
     @RequestMapping(value="/accounts", method=RequestMethod.POST)
     public ResponseEntity<?> createAccount(@Valid @RequestBody Account account) {
+
 
         /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
