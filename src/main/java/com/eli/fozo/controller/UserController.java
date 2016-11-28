@@ -24,19 +24,25 @@ public class UserController {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    @RequestMapping(value="/users", method= RequestMethod.POST)
-    public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
-
-        /* Make sure this account does not already exist. */
+    public Boolean exists(User user) {
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
                 Query.FilterOperator.EQUAL,
                 user.getUserId()
         );
-
         Query userQuery = new Query("User").setFilter(filter);
 
-        if (null != this.datastore.prepare(userQuery).asSingleEntity()) {
+        if (null == datastore.prepare(userQuery).asSingleEntity()) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+    
+    @RequestMapping(value="/users", method= RequestMethod.POST)
+    public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
+
+        /* Make sure this user does not already exist. */
+        if (exists(user)) {
             String message = "Attempted to create a User that already exists.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);

@@ -169,57 +169,6 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
 
-    /* Add a challenge to a person. */
-    @RequestMapping(value="/accounts/{userId}/challenges/{challengeId}", method=RequestMethod.PUT)
-    public ResponseEntity<?> addChallengeToAccount(
-            @PathVariable String userId,
-            @PathVariable long challengeId
-    ) {
-
-        /* Check if this account exists. */
-        Query.Filter filter =
-                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
-        Query accountQuery = new Query("Account").setFilter(filter);
-
-        /* Ancestor queries are guaranteed to maintain strong consistency. */
-        accountQuery.setAncestor(this.defaultGroupKey);
-
-        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
-
-        if (null == accountEntity) {
-            /* TODO: Handle this in the ControllerAdvice class. */
-            String message = "Attempted to update an Account that does not exist.";
-            logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
-        }
-
-        /* Check if the Challenge already exists*/
-        filter = new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, challengeId);
-        Query challengeQuery = new Query("Challenge").setFilter(filter);
-        Entity challengeEntity = this.datastore.prepare(challengeQuery).asSingleEntity();
-
-        if (null == challengeEntity) {
-            /* TODO: Handle this in the ControllerAdvice class. */
-            String message = "Attempted to update a Challenge that does not exist.";
-            logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
-        }
-
-        List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
-
-        if (null == challengesPending) {
-            /* The list of pending challenges has not been previously initialized. */
-            challengesPending = new ArrayList<Key>();
-        }
-
-        challengesPending.add(challengeEntity.getKey());
-        accountEntity.setProperty("challengesPending", challengesPending);
-
-        this.datastore.put(accountEntity);
-
-        return new ResponseEntity<Object>(HttpStatus.CREATED);
-    }
-
     @RequestMapping(value="/accounts", method=RequestMethod.PUT)
     public ResponseEntity<?> updateAccounts(@Valid @RequestBody List<Account> accounts) {
 
@@ -310,4 +259,56 @@ public class AccountController {
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
+
+    /* Add a challenge to an account. */
+    @RequestMapping(value="/accounts/{userId}/challenges/{challengeId}", method=RequestMethod.PUT)
+    public ResponseEntity<?> addChallengeToAccount(
+            @PathVariable String userId,
+            @PathVariable long challengeId
+    ) {
+
+        /* Check if this account exists. */
+        Query.Filter filter =
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query accountQuery = new Query("Account").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        accountQuery.setAncestor(this.defaultGroupKey);
+
+        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
+
+        if (null == accountEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to update an Account that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        /* Check if the Challenge already exists*/
+        filter = new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, challengeId);
+        Query challengeQuery = new Query("Challenge").setFilter(filter);
+        Entity challengeEntity = this.datastore.prepare(challengeQuery).asSingleEntity();
+
+        if (null == challengeEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to update a Challenge that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
+
+        if (null == challengesPending) {
+            /* The list of pending challenges has not been previously initialized. */
+            challengesPending = new ArrayList<Key>();
+        }
+
+        challengesPending.add(challengeEntity.getKey());
+        accountEntity.setProperty("challengesPending", challengesPending);
+
+        this.datastore.put(accountEntity);
+
+        return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
 }
