@@ -1,6 +1,7 @@
 package com.eli.fozo.controller;
 
 
+import com.eli.fozo.repository.UserRepo;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -24,25 +25,14 @@ public class UserController {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    public Boolean exists(User user) {
-        Query.Filter filter = new Query.FilterPredicate(
-                "userId",
-                Query.FilterOperator.EQUAL,
-                user.getUserId()
-        );
-        Query userQuery = new Query("User").setFilter(filter);
+    private UserRepo userRepo = new UserRepo();
 
-        if (null == datastore.prepare(userQuery).asSingleEntity()) {
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
-    }
-    
+
     @RequestMapping(value="/users", method= RequestMethod.POST)
     public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
 
         /* Make sure this user does not already exist. */
-        if (exists(user)) {
+        if (userRepo.exists(user)) {
             String message = "Attempted to create a User that already exists.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
