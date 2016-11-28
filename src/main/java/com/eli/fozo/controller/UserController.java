@@ -6,14 +6,15 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.User;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 @RestController
@@ -50,6 +51,34 @@ public class UserController {
         this.datastore.put(userEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value="/users/{userId}", method=RequestMethod.GET)
+    public ResponseEntity<?> getUser(@PathVariable String userId) {
+        Query.Filter filter =
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query userQuery = new Query("User").setFilter(filter);
+
+        Entity userEntity = this.datastore.prepare(userQuery).asSingleEntity();
+
+        if (null == userEntity) {
+            /* TODO: Handle this in the ControllerAdvice class. */
+            String message = "Attempted to retrieve a User that does not exist.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+        }
+
+        /* TODO: Consider extracting creating of HTTP headers to separate method. */
+        HttpHeaders requestHeaders = new HttpHeaders();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
+        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(acceptableMediaTypes);
+
+        String email = (String) userEntity.getProperty("email");
+        String authDomain = (String) userEntity.getProperty("authDomain");
+        User account = new User(email, authDomain, userId);
+
+        return new ResponseEntity<>(account, requestHeaders, HttpStatus.OK);
     }
 
 }
