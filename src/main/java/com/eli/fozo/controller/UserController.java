@@ -32,7 +32,7 @@ public class UserController {
     public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
 
         /* Make sure this user does not already exist. */
-        if (userRepo.exists(user)) {
+        if (userRepo.exists(user.getUserId())) {
             String message = "Attempted to create a User that already exists.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
@@ -51,18 +51,19 @@ public class UserController {
 
     @RequestMapping(value="/users/{userId}", method=RequestMethod.GET)
     public ResponseEntity<?> getUser(@PathVariable String userId) {
-        Query.Filter filter =
-                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
-        Query userQuery = new Query("User").setFilter(filter);
-
-        Entity userEntity = this.datastore.prepare(userQuery).asSingleEntity();
-
-        if (null == userEntity) {
+        if (!userRepo.exists(userId)) {
             /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to retrieve a User that does not exist.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
         }
+
+
+        Query.Filter filter =
+                new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
+        Query userQuery = new Query("User").setFilter(filter);
+        Entity userEntity = this.datastore.prepare(userQuery).asSingleEntity();
+
 
         /* TODO: Consider extracting creating of HTTP headers to separate method. */
         HttpHeaders requestHeaders = new HttpHeaders();

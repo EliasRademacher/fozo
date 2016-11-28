@@ -12,11 +12,11 @@ public class UserRepo {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    public Boolean exists(User user) {
+    public Boolean exists(String userId) {
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
                 Query.FilterOperator.EQUAL,
-                user.getUserId()
+                userId
         );
         Query userQuery = new Query("User").setFilter(filter);
 
@@ -25,4 +25,6 @@ public class UserRepo {
         }
         return Boolean.TRUE;
     }
+
+
 }
