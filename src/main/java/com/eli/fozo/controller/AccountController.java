@@ -107,7 +107,6 @@ public class AccountController {
     @RequestMapping(value="/accounts", method=RequestMethod.POST)
     public ResponseEntity<?> createAccount(@Valid @RequestBody Account account) {
 
-
         /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
@@ -115,12 +114,12 @@ public class AccountController {
                 account.getUserId()
         );
 
-        Query personQuery = new Query("Account").setFilter(filter);
+        Query accountQuery = new Query("Account").setFilter(filter);
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
-        personQuery.setAncestor(this.defaultGroupKey);
+        accountQuery.setAncestor(this.defaultGroupKey);
 
-        if (null != this.datastore.prepare(personQuery).asSingleEntity()) {
+        if (null != this.datastore.prepare(accountQuery).asSingleEntity()) {
             String message = "Attempted to create an Account with a user ID that already exists.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
@@ -130,6 +129,7 @@ public class AccountController {
         Entity accountEntity = new Entity("Account", account.getUserId(), this.defaultGroupKey);
 
         accountEntity.setProperty("userId", account.getUserId());
+        accountEntity.setProperty("password", account.getPassword());
         accountEntity.setProperty("challengesCompleted", account.getChallengesCompleted());
         accountEntity.setProperty("challengesPending", account.getChallengesPending());
         this.datastore.put(accountEntity);
@@ -309,6 +309,37 @@ public class AccountController {
         this.datastore.put(accountEntity);
 
         return new ResponseEntity<Object>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value="accounts/login", method=RequestMethod.POST)
+    public ResponseEntity<?> authenticate(@Valid @RequestBody Account account) {
+        /* Make sure this account does not already exist. */
+        Query.Filter filter = new Query.FilterPredicate(
+                "userId",
+                Query.FilterOperator.EQUAL,
+                account.getUserId()
+        );
+
+        Query accountQuery = new Query("Account").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        accountQuery.setAncestor(this.defaultGroupKey);
+
+        Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
+        if (null == accountEntity) {
+            String message = "Incorrect user ID or password.";
+            logger.warning("User ID not found");
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
+        String retrievedPassword = (String) accountEntity.getProperty("password");
+        if (!account.getPassword().equals(retrievedPassword)) {
+            String message = "Incorrect user ID or password.";
+            logger.warning("Wrong password");
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
 }
