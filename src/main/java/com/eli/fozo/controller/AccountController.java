@@ -1,7 +1,6 @@
 package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import model.Account;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -66,7 +65,16 @@ public class AccountController {
 
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
     @RequestMapping(value="/accounts", method=RequestMethod.GET)
-    public ResponseEntity<List<Account>> getAccounts() {
+    public ResponseEntity<?> getAccounts(
+            @RequestHeader(value="token") String headerToken,
+            @RequestHeader(value="userId") String headerUserId
+    ) {
+        if (!isCorrectToken(headerUserId, headerToken)) {
+            String message = "User must be logged in to view accounts.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
         Query accountQuery = new Query("Account");
 
         /* Ancestor queries are guaranteed to maintain strong consistency. */
@@ -180,7 +188,11 @@ public class AccountController {
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.PUT)
-    public ResponseEntity<?> updateAccount(@Valid @RequestBody Account account, @PathVariable String userId) {
+    public ResponseEntity<?> updateAccount(
+            @Valid @RequestBody Account account,
+            @PathVariable String userId,
+            @RequestHeader(value="token") String headerToken
+    ) {
 
         /* TODO: Make sure that the provided Account is valid. */
         if (null == account.getUserId()) {
@@ -189,9 +201,7 @@ public class AccountController {
             return new ResponseEntity<Object>(message, HttpStatus.BAD_REQUEST);
         }
 
-        /* Make sure this user is logged in. */
-        Boolean loggedIn = (Boolean) cache.get(account.getUserId());
-        if (null == loggedIn || !(Boolean) loggedIn) {
+        if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to update account.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
@@ -225,11 +235,12 @@ public class AccountController {
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.DELETE)
-    public ResponseEntity<?> deleteAccount(@PathVariable String userId) {
+    public ResponseEntity<?> deleteAccount(
+            @PathVariable String userId,
+            @RequestHeader(value="token") String headerToken
+            ) {
 
-        /* Make sure this user is logged in. */
-        Boolean loggedIn = (Boolean) cache.get(userId);
-        if (null == loggedIn || !(Boolean) loggedIn) {
+        if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to delete account.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
@@ -261,12 +272,11 @@ public class AccountController {
     @RequestMapping(value="/accounts/{userId}/challenges/{challengeId}", method=RequestMethod.PUT)
     public ResponseEntity<?> addChallengeToAccount(
             @PathVariable String userId,
-            @PathVariable long challengeId
+            @PathVariable long challengeId,
+            @RequestHeader(value="token") String headerToken
     ) {
 
-        /* Make sure this user is logged in. */
-        Boolean loggedIn = (Boolean) cache.get(userId);
-        if (null == loggedIn || !(Boolean) loggedIn) {
+        if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to update account.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
