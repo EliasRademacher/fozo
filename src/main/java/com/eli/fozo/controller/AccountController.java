@@ -1,6 +1,7 @@
 package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import model.Account;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,16 @@ public class AccountController {
         }
     }
 
+    private Boolean isCorrectToken(String userId, Integer token) {
+        Integer realToken = (Integer) cache.get(userId);
+
+        if (null == realToken || !realToken.equals(token)) {
+            return Boolean.TRUE;
+        }
+
+        return Boolean.TRUE;
+    }
+
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
     @RequestMapping(value="/accounts", method=RequestMethod.GET)
     public ResponseEntity<List<Account>> getAccounts() {
@@ -88,9 +99,7 @@ public class AccountController {
             @RequestHeader(value="token") Integer headerToken
             ) {
 
-         /* Make sure this user is logged in. */
-        Integer realToken = (Integer) cache.get(userId);
-        if (null == realToken || !realToken.equals(headerToken)) {
+        if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to view account.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
