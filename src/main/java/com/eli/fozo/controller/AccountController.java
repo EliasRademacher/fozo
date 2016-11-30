@@ -48,14 +48,20 @@ public class AccountController {
         }
     }
 
-    private Boolean isCorrectToken(String userId, Integer token) {
-        Integer realToken = (Integer) cache.get(userId);
+    private Boolean isCorrectToken(String userId, String token) {
+        String realToken = (String) cache.get(userId);
 
         if (null == realToken || !realToken.equals(token)) {
-            return Boolean.TRUE;
+            return Boolean.FALSE;
         }
 
         return Boolean.TRUE;
+    }
+
+    private String generateToken() {
+        Random random = new Random();
+        int val = random.nextInt();
+        return Integer.toHexString(val);
     }
 
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
@@ -96,7 +102,7 @@ public class AccountController {
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.GET)
     public ResponseEntity<?> getAccount(
             @PathVariable String userId,
-            @RequestHeader(value="token") Integer headerToken
+            @RequestHeader(value="token") String headerToken
             ) {
 
         if (!isCorrectToken(userId, headerToken)) {
@@ -311,7 +317,7 @@ public class AccountController {
     }
 
     @RequestMapping(value="accounts/login", method=RequestMethod.POST)
-    public ResponseEntity<?> login(@Valid @RequestBody Account account) {
+    public ResponseEntity<String> login(@Valid @RequestBody Account account) {
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
                 Query.FilterOperator.EQUAL,
@@ -327,20 +333,24 @@ public class AccountController {
         if (null == accountEntity) {
             String message = "Incorrect user ID or password.";
             logger.warning("User ID not found");
-            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
         String retrievedPassword = (String) accountEntity.getProperty("password");
         if (!account.getPassword().equals(retrievedPassword)) {
             String message = "Incorrect user ID or password.";
             logger.warning("Wrong password");
-            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
         /* Record that the user is logged in */
-        cache.put(account.getUserId(), 12345);
+        String token = generateToken();
+        cache.put(account.getUserId(), token);
 
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("token", token);
+
+        return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/accounts/logout", method=RequestMethod.POST)
@@ -364,7 +374,7 @@ public class AccountController {
         }
 
         /* Record that the user is logged out */
-        cache.put(userId, Boolean.FALSE);
+        cache.put(userId, "");
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
