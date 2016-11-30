@@ -343,7 +343,6 @@ public class AccountController {
 
     @RequestMapping(value="accounts/login", method=RequestMethod.POST)
     public ResponseEntity<?> login(@Valid @RequestBody Account account) {
-        /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
                 Query.FilterOperator.EQUAL,
@@ -374,5 +373,32 @@ public class AccountController {
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
+
+    @RequestMapping(value="/accounts/logout", method=RequestMethod.POST)
+    public ResponseEntity<?> logout(@Valid @RequestBody Account account) {
+        String userId = account.getUserId();
+        Query.Filter filter = new Query.FilterPredicate(
+                "userId",
+                Query.FilterOperator.EQUAL,
+                userId
+        );
+
+        Query accountQuery = new Query("Account").setFilter(filter);
+
+        /* Ancestor queries are guaranteed to maintain strong consistency. */
+        accountQuery.setAncestor(this.defaultGroupKey);
+
+        if (null == datastore.prepare(accountQuery).asSingleEntity()) {
+            String message = "User ID not found";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
+        /* Record that the user is logged in */
+        cache.put(userId, Boolean.FALSE);
+
+        return new ResponseEntity<Object>(HttpStatus.OK);
+    }
+
 
 }
