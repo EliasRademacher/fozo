@@ -47,7 +47,6 @@ public class AccountController {
         }
     }
 
-
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
     @RequestMapping(value="/accounts", method=RequestMethod.GET)
     public ResponseEntity<List<Account>> getAccounts() {
@@ -84,7 +83,20 @@ public class AccountController {
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.GET)
-    public ResponseEntity<?> getAccount(@PathVariable String userId) {
+    public ResponseEntity<?> getAccount(
+            @PathVariable String userId,
+            @RequestHeader(value="token") Integer headerToken
+            ) {
+
+         /* Make sure this user is logged in. */
+        Integer realToken = (Integer) cache.get(userId);
+        if (null == realToken || !realToken.equals(headerToken)) {
+            String message = "User must be logged in to view account.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
+
         Query.Filter filter =
                 new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
         Query accountQuery = new Query("Account").setFilter(filter);
@@ -203,7 +215,7 @@ public class AccountController {
         /* Make sure this user is logged in. */
         Boolean loggedIn = (Boolean) cache.get(userId);
         if (null == loggedIn || !(Boolean) loggedIn) {
-            String message = "User must be logged in to update account.";
+            String message = "User must be logged in to delete account.";
             logger.warning(message);
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
@@ -317,7 +329,7 @@ public class AccountController {
         }
 
         /* Record that the user is logged in */
-        cache.put(account.getUserId(), Boolean.TRUE);
+        cache.put(account.getUserId(), 12345);
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
