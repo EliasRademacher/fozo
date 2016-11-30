@@ -14,8 +14,6 @@ import javax.cache.CacheException;
 import javax.cache.CacheFactory;
 import javax.cache.CacheManager;
 
-
-import javax.validation.BootstrapConfiguration;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.logging.Logger;
@@ -271,6 +269,15 @@ public class AccountController {
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.DELETE)
     public ResponseEntity<?> deleteAccount(@PathVariable String userId) {
+
+        /* Make sure this user is logged in. */
+        Boolean loggedIn = (Boolean) cache.get(userId);
+        if (null == loggedIn || !(Boolean) loggedIn) {
+            String message = "User must be logged in to update account.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
+
         Query.Filter filter = new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
         Query accountQuery = new Query("Account").setFilter(filter);
 
@@ -296,6 +303,14 @@ public class AccountController {
             @PathVariable String userId,
             @PathVariable long challengeId
     ) {
+
+        /* Make sure this user is logged in. */
+        Boolean loggedIn = (Boolean) cache.get(userId);
+        if (null == loggedIn || !(Boolean) loggedIn) {
+            String message = "User must be logged in to update account.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
 
         /* Check if this account exists. */
         Query.Filter filter =
