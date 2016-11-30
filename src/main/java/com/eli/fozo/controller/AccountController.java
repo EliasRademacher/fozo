@@ -8,6 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheFactory;
+import javax.cache.CacheManager;
+
+
+import javax.validation.BootstrapConfiguration;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.logging.Logger;
@@ -24,12 +32,21 @@ public class AccountController {
 
     private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+    private Cache cache;
+
     private Key defaultGroupKey;
 
     public AccountController() {
         Entity defaultGroup = new Entity("AccountGroup", "defaultGroup");
         this.defaultGroupKey = defaultGroup.getKey();
         datastore.put(defaultGroup);
+
+        try {
+            CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+            cache = cacheFactory.createCache(Collections.emptyMap());
+        } catch (CacheException cacheException) {
+            cacheException.printStackTrace();
+        }
     }
 
 
@@ -141,6 +158,19 @@ public class AccountController {
     public ResponseEntity<?> updateAccount(@Valid @RequestBody Account account, @PathVariable String userId) {
 
         /* TODO: Make sure that the provided Account is valid. */
+        if (null == account.getUserId()) {
+            String message = "User ID must be specified.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.BAD_REQUEST);
+        }
+
+        /* Make sure this user is logged in. */
+        Boolean loggedIn = (Boolean) cache.get(account.getUserId());
+        if (null == loggedIn || !(Boolean) loggedIn) {
+            String message = "User must be logged in to update account.";
+            logger.warning(message);
+            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+        }
 
         /* Check if this account exists. */
         Query.Filter filter =
@@ -312,7 +342,7 @@ public class AccountController {
     }
 
     @RequestMapping(value="accounts/login", method=RequestMethod.POST)
-    public ResponseEntity<?> authenticate(@Valid @RequestBody Account account) {
+    public ResponseEntity<?> login(@Valid @RequestBody Account account) {
         /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
@@ -338,6 +368,9 @@ public class AccountController {
             logger.warning("Wrong password");
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
+
+        /* Record that the user is logged in */
+        cache.put(account.getUserId(), Boolean.TRUE);
 
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
