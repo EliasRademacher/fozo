@@ -197,76 +197,6 @@ public class AccountController {
         return new ResponseEntity<Object>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(value="/accounts", method=RequestMethod.PUT)
-    public ResponseEntity<?> updateAccounts(@Valid @RequestBody List<Account> accounts) {
-
-        List<Entity> accountEntities = new ArrayList<>();
-
-        for (Account account : accounts) {
-            Query.Filter filter = new Query.FilterPredicate(
-                    "userId",
-                    Query.FilterOperator.EQUAL,
-                    account.getUserId()
-            );
-            Query accountQuery = new Query("Account").setFilter(filter);
-
-            /* Ancestor queries are guaranteed to maintain strong consistency. */
-            accountQuery.setAncestor(this.defaultGroupKey);
-
-            Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
-
-            /* Check if each account exists. */
-            if (null == accountEntity) {
-                String message = "Attempted to update an Account that does not exist.";
-                logger.warning(message);
-                return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
-            }
-
-            accountEntities.add(accountEntity);
-        }
-
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
-            Entity accountEntity = accountEntities.get(i);
-
-            /* No update operation in Google Datastore, so replace old Account with updated one. */
-            accountEntity.setProperty("userId", account.getUserId());
-            accountEntity.setProperty("challengesCompleted", account.getChallengesCompleted());
-            accountEntity.setProperty("challengesPending", account.getChallengesPending());
-            this.datastore.put(accountEntity);
-        }
-
-        return new ResponseEntity<Object>(HttpStatus.OK);
-    }
-
-    @RequestMapping(value="/accounts", method=RequestMethod.DELETE)
-    public ResponseEntity<?> deleteAccounts() {
-        Query accountQuery = new Query("Account");
-
-        /* Ancestor queries are guaranteed to maintain strong consistency. */
-        accountQuery.setAncestor(this.defaultGroupKey);
-
-        List<Entity> allAccountEntities =
-                this.datastore.prepare(accountQuery).asList(FetchOptions.Builder.withDefaults());
-
-        List<Key> accountEntitiesToDelete = new ArrayList<>();
-
-        /* Clean up Challenges associated with Accounts before you delete the Accounts. */
-        for (Entity entity : allAccountEntities) {
-            List<Key> challengesPendingKeys = (List<Key>) entity.getProperty("challengesPending");
-            if (null != challengesPendingKeys) {
-                accountEntitiesToDelete.addAll(challengesPendingKeys);
-            /* TODO: Don't forget to also delete challengesCompleted when that is implemented. */
-            }
-
-            this.datastore.delete(entity.getKey());
-        }
-
-        this.datastore.delete(accountEntitiesToDelete);
-
-        return new ResponseEntity<Object>(HttpStatus.OK);
-    }
-
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.DELETE)
     public ResponseEntity<?> deleteAccount(@PathVariable String userId) {
 
@@ -289,6 +219,9 @@ public class AccountController {
         /* TODO: Also delete associated completed challenges. */
 
         this.datastore.delete(accountEntity.getKey());
+
+        /* Log user out */
+        cache.put(userId, Boolean.FALSE);
 
         if (null != challengeEntitiesToDelete) {
             this.datastore.delete(challengeEntitiesToDelete);
@@ -409,7 +342,7 @@ public class AccountController {
             return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
         }
 
-        /* Record that the user is logged in */
+        /* Record that the user is logged out */
         cache.put(userId, Boolean.FALSE);
 
         return new ResponseEntity<Object>(HttpStatus.OK);
