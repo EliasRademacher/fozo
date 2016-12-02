@@ -155,7 +155,7 @@ public class AccountController {
 
     /* You can't create a User without an account. */
     @RequestMapping(value="/accounts", method=RequestMethod.POST)
-    public ResponseEntity<?> createAccount(@Valid @RequestBody Account account) {
+    public ResponseEntity<String> createAccount(@Valid @RequestBody Account account) {
 
         /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
@@ -170,9 +170,9 @@ public class AccountController {
         accountQuery.setAncestor(this.defaultGroupKey);
 
         if (null != this.datastore.prepare(accountQuery).asSingleEntity()) {
-            String message = "Attempted to create an Account with a user ID that already exists.";
+            String message = "An account with user ID \"" +  account.getUserId() + "\" already exists.";
             logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
         }
 
         /* Give the key for this entity the same as its userId property. */
@@ -184,7 +184,9 @@ public class AccountController {
         accountEntity.setProperty("challengesPending", account.getChallengesPending());
         this.datastore.put(accountEntity);
 
-        return new ResponseEntity<Object>(HttpStatus.CREATED);
+        String message = "Successfully created account with user ID \"" + account.getUserId() + "\"";
+        logger.info(message);
+        return new ResponseEntity<String>(message, HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.PUT)
