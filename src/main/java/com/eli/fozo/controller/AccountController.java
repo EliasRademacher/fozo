@@ -360,7 +360,7 @@ public class AccountController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("token", token);
 
-        return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/accounts/logout", method=RequestMethod.POST)
