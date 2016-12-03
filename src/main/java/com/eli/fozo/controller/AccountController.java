@@ -2,6 +2,7 @@ package com.eli.fozo.controller;
 
 import com.google.appengine.api.datastore.*;
 import model.Account;
+import model.Response;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -159,7 +160,7 @@ public class AccountController {
 
     /* You can't create a User without an account. */
     @RequestMapping(value="/accounts", method=RequestMethod.POST)
-    public ResponseEntity<String> createAccount(@Valid @RequestBody Account account) {
+    public ResponseEntity<Response> createAccount(@Valid @RequestBody Account account) {
 
         /* Make sure this account does not already exist. */
         Query.Filter filter = new Query.FilterPredicate(
@@ -176,7 +177,7 @@ public class AccountController {
         if (null != this.datastore.prepare(accountQuery).asSingleEntity()) {
             String message = "An account with user ID \"" +  account.getUserId() + "\" already exists.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new Response(message), getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Give the key for this entity the same as its userId property. */
@@ -188,9 +189,11 @@ public class AccountController {
         accountEntity.setProperty("challengesPending", account.getChallengesPending());
         this.datastore.put(accountEntity);
 
-        String message = "{\"message\": \"Successfully created account with user ID " + account.getUserId() + ".\"}";
+        String message = "Successfully created account with user ID " + account.getUserId();
+        Response response = new Response(message);
         logger.info(message);
-        return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.CREATED);
+
+        return new ResponseEntity<>(response, getHttpHeaders(), HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.PUT)
@@ -339,7 +342,7 @@ public class AccountController {
     }
 
     @RequestMapping(value="accounts/login", method=RequestMethod.POST)
-    public ResponseEntity<String> login(@Valid @RequestBody Account account) {
+    public ResponseEntity<Response> login(@Valid @RequestBody Account account) {
         Query.Filter filter = new Query.FilterPredicate(
                 "userId",
                 Query.FilterOperator.EQUAL,
@@ -353,16 +356,16 @@ public class AccountController {
 
         Entity accountEntity = this.datastore.prepare(accountQuery).asSingleEntity();
         if (null == accountEntity) {
-            String message = "Incorrect user ID or password.";
-            logger.warning("User ID not found");
-            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
+            logger.warning("User ID \'" + account.getUserId() + "\' not found");
+            Response response = new Response("Incorrect user ID or password.");
+            return new ResponseEntity<>(response, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         String retrievedPassword = (String) accountEntity.getProperty("password");
         if (!account.getPassword().equals(retrievedPassword)) {
-            String message = "Incorrect user ID or password.";
             logger.warning("Wrong password");
-            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
+            Response response = new Response("Incorrect user ID or password.");
+            return new ResponseEntity<>(response, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Record that the user is logged in */
@@ -374,7 +377,7 @@ public class AccountController {
 
         String message = "Logged in to account with user ID " + account.getUserId();
         logger.info(message);
-        return new ResponseEntity<String>("{\"message\": \"" + message + "\"}", httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new Response(message), httpHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/accounts/logout", method=RequestMethod.POST)
