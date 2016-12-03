@@ -63,6 +63,19 @@ public class AccountController {
         return Integer.toHexString(val);
     }
 
+    /**
+     * Generate HTTP headers.
+     *
+     * @return {@link HttpHeaders} with media type set to application json.
+     */
+    private HttpHeaders getHttpHeaders() {
+        HttpHeaders requestHeaders = new HttpHeaders();
+        List<MediaType> acceptableMediaTypes = new ArrayList<>();
+        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
+        requestHeaders.setAccept(acceptableMediaTypes);
+        return requestHeaders;
+    }
+
     /* TODO: Have a "UserController.getUsers" which calls this method to return a list of User objects. */
     @RequestMapping(value="/accounts", method=RequestMethod.GET)
     public ResponseEntity<?> getAccounts(
@@ -72,7 +85,7 @@ public class AccountController {
         if (!isCorrectToken(headerUserId, headerToken)) {
             String message = "User must be logged in to view accounts.";
             logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<Object>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         Query accountQuery = new Query("Account");
@@ -99,13 +112,10 @@ public class AccountController {
             accounts.add(account);
         }
 
-        HttpHeaders requestHeaders = new HttpHeaders();
-        List<MediaType> acceptableMediaTypes = new ArrayList<>();
-        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
-        requestHeaders.setAccept(acceptableMediaTypes);
-
-        return new ResponseEntity<>(accounts, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(accounts, getHttpHeaders(), HttpStatus.OK);
     }
+
+
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.GET)
     public ResponseEntity<?> getAccount(
@@ -116,7 +126,7 @@ public class AccountController {
         if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to view account.";
             logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<Object>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
 
@@ -133,14 +143,8 @@ public class AccountController {
             /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to retrieve an Account that does not exist.";
             logger.warning(message);
-            return new ResponseEntity<Object>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<Object>(message, getHttpHeaders(), HttpStatus.NOT_FOUND);
         }
-
-        /* TODO: Consider extracting creating of HTTP headers to separate method. */
-        HttpHeaders requestHeaders = new HttpHeaders();
-        List<MediaType> acceptableMediaTypes = new ArrayList<>();
-        acceptableMediaTypes.add(MediaType.APPLICATION_JSON);
-        requestHeaders.setAccept(acceptableMediaTypes);
 
         Account account = new Account(userId);
 
@@ -150,7 +154,7 @@ public class AccountController {
         List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
         account.setChallengesPending(challengesPending);
 
-        return new ResponseEntity<>(account, requestHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(account, getHttpHeaders(), HttpStatus.OK);
     }
 
     /* You can't create a User without an account. */
@@ -172,7 +176,7 @@ public class AccountController {
         if (null != this.datastore.prepare(accountQuery).asSingleEntity()) {
             String message = "An account with user ID \"" +  account.getUserId() + "\" already exists.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Give the key for this entity the same as its userId property. */
@@ -184,9 +188,9 @@ public class AccountController {
         accountEntity.setProperty("challengesPending", account.getChallengesPending());
         this.datastore.put(accountEntity);
 
-        String message = "Successfully created account with user ID \"" + account.getUserId() + "\"";
+        String message = "{\"message\": \"Successfully created account with user ID " + account.getUserId() + ".\"}";
         logger.info(message);
-        return new ResponseEntity<String>(message, HttpStatus.CREATED);
+        return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.PUT)
@@ -200,13 +204,13 @@ public class AccountController {
         if (null == account.getUserId()) {
             String message = "User ID must be specified.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.BAD_REQUEST);
         }
 
         if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to update account.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Check if this account exists. */
@@ -223,7 +227,7 @@ public class AccountController {
             /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to update an Account that does not exist.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.NOT_FOUND);
         }
 
         /* No update operation in Google Datastore, so replace old Account with updated one. */
@@ -235,7 +239,7 @@ public class AccountController {
 
         String message = "Successfully updated account with user ID \"" + account.getUserId() + "\"";
         logger.info(message);
-        return new ResponseEntity<String>(message, HttpStatus.CREATED);
+        return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/accounts/{userId}", method=RequestMethod.DELETE)
@@ -247,7 +251,7 @@ public class AccountController {
         if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to delete account.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         Query.Filter filter = new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId);
@@ -271,7 +275,7 @@ public class AccountController {
 
         String message = "Successfully deleted account with user ID \"" + userId + "\"";
         logger.info(message);
-        return new ResponseEntity<String>(message, HttpStatus.OK);
+        return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.OK);
     }
 
     /* Add a challenge to an account. */
@@ -285,7 +289,7 @@ public class AccountController {
         if (!isCorrectToken(userId, headerToken)) {
             String message = "User must be logged in to update account.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Check if this account exists. */
@@ -302,7 +306,7 @@ public class AccountController {
             /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to update an Account that does not exist.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.NOT_FOUND);
         }
 
         /* Check if the Challenge already exists*/
@@ -314,7 +318,7 @@ public class AccountController {
             /* TODO: Handle this in the ControllerAdvice class. */
             String message = "Attempted to update a Challenge that does not exist.";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.NOT_FOUND);
         }
 
         List<Key> challengesPending = (List<Key>) accountEntity.getProperty("challengesPending");
@@ -331,7 +335,7 @@ public class AccountController {
 
         String message = "Successfully added Challenge to account with user ID \"" + userId + "\"";
         logger.info(message);
-        return new ResponseEntity<String>(HttpStatus.CREATED);
+        return new ResponseEntity<String>(getHttpHeaders(), HttpStatus.CREATED);
     }
 
     @RequestMapping(value="accounts/login", method=RequestMethod.POST)
@@ -351,26 +355,26 @@ public class AccountController {
         if (null == accountEntity) {
             String message = "Incorrect user ID or password.";
             logger.warning("User ID not found");
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         String retrievedPassword = (String) accountEntity.getProperty("password");
         if (!account.getPassword().equals(retrievedPassword)) {
             String message = "Incorrect user ID or password.";
             logger.warning("Wrong password");
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Record that the user is logged in */
         String token = generateToken();
         cache.put(account.getUserId(), token);
 
-        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.add("token", token);
 
-        String message = "Logged in to account with user ID \"" + account.getUserId() + "\"";
+        String message = "Logged in to account with user ID " + account.getUserId();
         logger.info(message);
-        return new ResponseEntity<String>(message, httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<String>("{\"message\": \"" + message + "\"}", httpHeaders, HttpStatus.OK);
     }
 
     @RequestMapping(value="/accounts/logout", method=RequestMethod.POST)
@@ -390,7 +394,7 @@ public class AccountController {
         if (null == datastore.prepare(accountQuery).asSingleEntity()) {
             String message = "User ID not found";
             logger.warning(message);
-            return new ResponseEntity<String>(message, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.FORBIDDEN);
         }
 
         /* Record that the user is logged out */
@@ -398,7 +402,7 @@ public class AccountController {
 
         String message = "Logged out of account with user ID \"" + account.getUserId() + "\"";
         logger.info(message);
-        return new ResponseEntity<String>(message, HttpStatus.OK);
+        return new ResponseEntity<String>(message, getHttpHeaders(), HttpStatus.OK);
     }
 
 
